@@ -124,7 +124,7 @@
         <h2>It's a ratio: outside divided by inside</h2>
         <p>A protection factor compares how much is in the air around you with how much reaches you behind the mask.</p>
         <p class="formula">Protection factor = particles outside ÷ particles inside</p>
-        <p>So a mask with a protection factor of 10 lets in about one tenth of what's in the air. Out of every 100 particles you would have breathed, about 10 still get in.</p>
+        <p>So a mask with a protection factor of 5 lets in about one fifth of what's in the air. Out of every 100 particles you would have breathed, about 20 still get in.</p>
       </section>
 
       <section class="ch" data-step="1">
@@ -152,10 +152,12 @@
 
       <section class="ch" data-step="4">
         <span class="num">5 · Time adds up</span>
-        <h2>What you breathe in grows with time</h2>
-        <p>What you take in depends on how much is in the air, how long you're there, and how much the mask cuts it.</p>
-        <p class="formula">What you breathe in ∝ concentration × time ÷ protection factor</p>
-        <p>So one hour without a mask is about the same as ten hours in a 10× respirator in the same air. Try it with the calculator.</p>
+        <h2>A mask slows the clock</h2>
+        <p>The longer you breathe the same air, the more you take in. A protection factor works like slowing that clock down: in a 5× mask, every 5 minutes count like 1 minute with no mask.</p>
+        <p class="formula">Time spent ÷ protection factor = the same as this long with no mask</p>
+        <p>An 8-hour flight in a disposable respirator (10×) adds up to about 48 minutes unmasked. In a face mask (about 3×) the same flight adds up to about 2 hours 40 minutes.</p>
+        <p>Two things make the clock run faster: more particles in the air, as in crowded, stuffy rooms or smoke, and breathing harder, as when exercising or talking loudly. That is where a better-fitting, higher-protection mask makes the biggest difference.</p>
+        <p class="soft">Simplified: real exposure also depends on ventilation and how close you are to the source. Try your own numbers with the calculator.</p>
       </section>
     </div>
     <div class="pager">
@@ -169,11 +171,11 @@
     <aside class="figure" aria-live="polite">
       <div class="state" data-state="0">
         <span class="fig-title">Out of every 100 particles</span>
-        <div class="fig-big" id="s0-big">10 get in with a 10× mask</div>
+        <div class="fig-big" id="s0-big">20 get in with a 5× mask</div>
         <div class="grid100" id="g0"></div>
         <div class="calc">
-          <label for="s0-pf">Protection factor <output id="s0-out">10×</output></label>
-          <input type="range" id="s0-pf" min="0" max="5" step="1" value="3">
+          <label for="s0-pf">Protection factor <output id="s0-out">5×</output></label>
+          <input type="range" id="s0-pf" min="0" max="5" step="1" value="2">
         </div>
       </div>
 
@@ -206,15 +208,18 @@
           <label for="c-mask">Mask</label>
           <select id="c-mask">
             <option value="1">No mask (1×)</option>
-            <option value="3">Face mask (~3×)</option>
+            <option value="3">Face mask (about 3×)</option>
+            <option value="4">Dust mask, FFP1 (4×)</option>
             <option value="10" selected>Disposable respirator, FFP2 / N95 (10×)</option>
             <option value="20">High-protection disposable, FFP3 (20×)</option>
+            <option value="20">Half face respirator (up to 20×)</option>
             <option value="40">Full face respirator (40×)</option>
           </select>
           <label for="c-hours">Time in the same air <output id="c-hours-out">8 hours</output></label>
           <input type="range" id="c-hours" min="1" max="12" step="1" value="8">
         </div>
         <div class="fig-big" id="c-result">—</div>
+        <p class="fig-note" id="c-math"></p>
         <div class="timeline">
           <span>Without a mask</span><div class="tl"><span id="tl-none"></span></div>
           <span id="tl-label">With this mask</span><div class="tl"><span id="tl-mask"></span></div>
@@ -232,7 +237,7 @@
   const $ = (id) => document.getElementById(id);
 
   // 1 · 100-dot grid with a protection factor slider
-  const PFS = [1, 2, 4, 10, 20, 50];
+  const PFS = [1, 2, 5, 10, 20, 50];
   const g0 = $('g0'); for (let i = 0; i < 100; i++) g0.appendChild(document.createElement('i'));
   const draw0 = () => {
     const pf = PFS[+$('s0-pf').value], n = Math.round(100 / pf);
@@ -271,9 +276,10 @@
   const draw4 = () => {
     const pf = +$('c-mask').value, h = +$('c-hours').value, eq = h / pf;
     $('c-hours-out').textContent = `${h} hour${h > 1 ? 's' : ''}`;
-    const mins = Math.round(eq * 60);
-    const eqText = mins >= 60 ? `${+(eq).toFixed(1)} hour${eq === 1 ? '' : 's'}` : `${mins} minutes`;
+    const mins = Math.round(eq * 60), hh = Math.floor(mins / 60), mm = mins % 60;
+    const eqText = mins < 60 ? `${mins} minutes` : `${hh} hour${hh > 1 ? 's' : ''}${mm ? ` ${mm} minutes` : ''}`;
     $('c-result').textContent = pf === 1 ? `${h} hour${h > 1 ? 's' : ''} of full exposure` : `Like ${eqText} with no mask`;
+    $('c-math').textContent = pf === 1 ? 'With no mask, every minute counts in full.' : `${h} hour${h > 1 ? 's' : ''} ÷ ${pf} = ${eqText}. The bars compare what you breathe in.`;
     $('tl-none').style.width = '100%';
     $('tl-mask').style.width = `${Math.max(1, 100 / pf)}%`;
     $('tl-label').textContent = $('c-mask').selectedOptions[0].textContent;
