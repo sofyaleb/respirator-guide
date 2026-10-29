@@ -234,7 +234,9 @@ window.RG = (() => {
     }
 
     function frame(now) {
-      const dt = Math.min(.05, (now - last) / 1000 || 0); last = now; clock += dt;
+      // SPEED slows the whole animation: particles, pauses, fades and the breathing rhythm
+      const SPEED = .6;
+      const dt = Math.min(.05, (now - last) / 1000 || 0) * SPEED; last = now; clock += dt;
       const breath = .55 + .75 * Math.max(0, Math.sin(clock * Math.PI / 2)); // inhale pulls particles in, in waves
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.setTransform(scale, 0, 0, scale, ox, oy);

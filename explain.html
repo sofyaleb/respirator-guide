@@ -99,18 +99,22 @@
   .tl span { display: block; height: 100%; background: var(--edge); border-radius: 7px; transition: width .4s ease; }
   .ffsvg { max-width: 100%; height: auto; }
   .ffsvg .lab { fill: var(--ink-soft); font-size: 12px; font-family: var(--font); }
-  .ffsvg .lab.small { font-size: 10.5px; }
-  .ffsvg .room circle { fill: var(--ink-soft); opacity: .55; }
-  .ffsvg .head { fill: var(--dot); }
-  .ffsvg .mask { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+  .ffsvg .lab.small { font-size: 10px; }
+  .ffsvg .headf { fill: var(--dot); }
+  .ffsvg .body { fill: var(--dot); opacity: .8; }
+  .ffsvg .eye { fill: var(--ink-soft); opacity: .6; }
+  .ffsvg .mask { fill: var(--surface); stroke: var(--accent); stroke-width: 2.4; }
+  .ffsvg .strap { stroke: var(--accent); stroke-width: 1.6; opacity: .7; }
+  .ffsvg .port { fill: var(--ink); }
+  .ffsvg .tube { fill: none; stroke: var(--ink-soft); stroke-width: 3; stroke-linecap: round; opacity: .55; }
+  .ffsvg .lead { fill: none; stroke: var(--ink-soft); stroke-width: 1; opacity: .6; }
+  .ffsvg .win { fill: var(--bg); stroke: var(--line); stroke-width: 2; }
+  .ffsvg .mask-win { stroke: var(--accent); }
+  .ffsvg .room circle { fill: var(--ink-soft); opacity: .75; }
   .ffsvg .inside { fill: var(--edge); }
-  .ffsvg .tube { fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-dasharray: 1 0; opacity: .7; }
-  .ffsvg .probe { fill: var(--ink-soft); }
-  .ffsvg .box { fill: var(--bg); stroke: var(--line); }
-  .ffsvg .val { fill: var(--ink); font-size: 14px; font-weight: 600; font-family: var(--font); }
-  .ffsvg .val.in { fill: var(--edge); } .ffsvg .val.ff { fill: var(--accent); }
-  .ffsvg .rule { stroke: var(--line); }
-  .ffsvg .lead { stroke: var(--ink-soft); opacity: .6; }
+  .ffsvg .div { fill: var(--ink-soft); font-size: 30px; font-family: var(--font); }
+  .ffsvg .val { fill: var(--ink); font-size: 16px; font-weight: 600; font-family: var(--font); }
+  .ffsvg .val.in { fill: var(--edge); }
   .state { display: grid; gap: 1rem; }
   @media (prefers-reduced-motion: no-preference) { .state:not([hidden]) { animation: rise .45s ease; } }
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -216,26 +220,36 @@
 
       <div class="state" data-state="3" hidden>
         <span class="fig-title">What a fit test measures</span>
-        <svg class="ffsvg" viewBox="0 0 360 230" width="100%" role="img" aria-label="A particle counter with one tube sampling the room and one sampling inside the mask. Room: 8,000. Inside the mask: 40.">
-          <text x="14" y="24" class="lab">In the room</text>
-          <g class="room"><circle cx="44" cy="121" r="2"/><circle cx="64" cy="166" r="2"/><circle cx="25" cy="61" r="2"/><circle cx="65" cy="184" r="2.5"/><circle cx="21" cy="100" r="2.5"/><circle cx="49" cy="88" r="2"/><circle cx="47" cy="98" r="2"/><circle cx="47" cy="113" r="2"/><circle cx="35" cy="123" r="2.5"/><circle cx="61" cy="66" r="2.5"/><circle cx="63" cy="173" r="2"/><circle cx="36" cy="107" r="3"/><circle cx="49" cy="66" r="2.5"/><circle cx="14" cy="118" r="2.5"/><circle cx="79" cy="93" r="3"/><circle cx="68" cy="197" r="2.5"/><circle cx="69" cy="159" r="2"/><circle cx="43" cy="122" r="2.5"/><circle cx="19" cy="64" r="2"/><circle cx="73" cy="204" r="2.5"/><circle cx="80" cy="180" r="3"/><circle cx="57" cy="81" r="2"/><circle cx="22" cy="149" r="2"/><circle cx="70" cy="114" r="2"/><circle cx="59" cy="155" r="2.5"/><circle cx="85" cy="94" r="2.5"/><circle cx="26" cy="59" r="2"/><circle cx="49" cy="193" r="2"/><circle cx="29" cy="128" r="2"/><circle cx="51" cy="161" r="2"/><circle cx="19" cy="135" r="2"/><circle cx="50" cy="127" r="2"/><circle cx="55" cy="117" r="2.5"/><circle cx="33" cy="210" r="3"/><circle cx="23" cy="119" r="2"/><circle cx="70" cy="118" r="2"/><circle cx="46" cy="141" r="2"/><circle cx="56" cy="190" r="2"/><circle cx="60" cy="55" r="3"/><circle cx="35" cy="137" r="2.5"/><circle cx="51" cy="190" r="2"/><circle cx="70" cy="97" r="3"/><circle cx="40" cy="73" r="2"/><circle cx="21" cy="58" r="2"/><circle cx="90" cy="82" r="2"/><circle cx="83" cy="169" r="2"/></g>
-          <path class="head" d="M182 34 C152 34 136 56 134 82 L131 98 L117 116 L128 122 L127 134 L133 140 L128 147 C130 158 137 165 148 167 L154 172 L154 226 L214 226 C210 198 218 174 220 146 C224 82 212 34 182 34 Z"/>
-          <path class="mask" d="M133 100 C118 108 108 124 110 140 C112 158 128 170 150 170 C160 166 166 158 168 150 C166 134 164 118 160 106 C152 100 142 98 133 100 Z"/>
-          <circle class="inside" cx="124" cy="134" r="3.2"/>
-          <line x1="126" y1="142" x2="132" y2="186" class="rule lead"/><text x="132" y="198" class="lab small" text-anchor="middle">Inside the mask</text>
-          <path class="tube" d="M60 52 C60 20 250 20 262 70"/>
-          <circle class="probe" cx="60" cy="54" r="3.5"/>
-          <path class="tube" d="M114 136 C96 150 150 222 200 218 C240 214 252 192 262 170"/>
-          <circle class="probe" cx="114" cy="136" r="3.5"/>
-          <rect class="box" x="240" y="66" width="108" height="110" rx="12"/>
-          <text x="252" y="88" class="lab small">Particle counter</text>
-          <text x="252" y="112" class="lab small">Room</text><text x="336" y="112" class="val" text-anchor="end">8,000</text>
-          <text x="252" y="136" class="lab small">Mask</text><text x="336" y="136" class="val in" text-anchor="end">40</text>
-          <line x1="252" y1="146" x2="336" y2="146" class="rule"/>
-          <text x="252" y="164" class="lab small">Fit factor</text><text x="336" y="164" class="val ff" text-anchor="end">200</text>
+        <svg class="ffsvg" viewBox="0 0 360 268" width="100%" role="img" aria-label="Fit test: a tube samples the room air and another samples inside the mask. The room sample is packed with particles; the mask sample has one. Room 8,000 per cubic centimetre divided by mask 40 gives a fit factor of 200.">
+          <!-- person in a respirator, front view -->
+          <path class="body" d="M140 120 C150 112 166 110 180 110 C194 110 210 112 220 120 L232 132 L128 132 Z"/>
+          <rect class="body" x="168" y="92" width="24" height="22" rx="6"/>
+          <ellipse class="headf" cx="180" cy="60" rx="36" ry="44"/>
+          <ellipse class="eye" cx="167" cy="50" rx="4.5" ry="2.2"/><ellipse class="eye" cx="193" cy="50" rx="4.5" ry="2.2"/>
+          <path class="mask" d="M180 64 C164 64 152 74 151 86 C150 98 164 108 180 109 C196 108 210 98 209 86 C208 74 196 64 180 64 Z"/>
+          <line class="strap" x1="152" y1="80" x2="144" y2="66"/><line class="strap" x1="208" y1="80" x2="216" y2="66"/>
+          <circle class="port" cx="194" cy="92" r="4"/>
+          <!-- room inlet -->
+          <circle class="port" cx="62" cy="66" r="4"/>
+          <text x="62" y="52" class="lab" text-anchor="middle">Room air</text>
+          <text x="236" y="52" class="lab">Inside the mask</text>
+          <path class="lead" d="M234 56 C214 62 204 74 198 86"/>
+          <!-- tubes down to the two sample windows -->
+          <path class="tube" d="M62 70 C62 104 92 108 92 134"/>
+          <path class="tube" d="M194 96 C206 120 268 108 268 134"/>
+          <!-- sample windows -->
+          <circle class="win" cx="92" cy="188" r="50"/>
+          <g class="room"><circle cx="84.0" cy="204.0" r="2.3"/><circle cx="84.8" cy="177.9" r="2.3"/><circle cx="64.9" cy="181.8" r="1.6"/><circle cx="122.6" cy="199.7" r="2.3"/><circle cx="121.5" cy="195.1" r="2"/><circle cx="104.5" cy="193.9" r="2"/><circle cx="54.8" cy="207.1" r="1.6"/><circle cx="107.5" cy="203.3" r="1.6"/><circle cx="60.8" cy="155.9" r="1.8"/><circle cx="66.4" cy="174.5" r="1.6"/><circle cx="101.8" cy="186.5" r="1.6"/><circle cx="107.6" cy="168.8" r="2"/><circle cx="101.7" cy="200.4" r="2"/><circle cx="77.1" cy="226.8" r="1.6"/><circle cx="106.8" cy="219.8" r="1.8"/><circle cx="74.0" cy="166.5" r="2"/><circle cx="81.0" cy="184.6" r="1.8"/><circle cx="111.4" cy="195.6" r="2.3"/><circle cx="79.3" cy="160.8" r="2"/><circle cx="78.2" cy="220.4" r="2.3"/><circle cx="67.9" cy="195.3" r="1.8"/><circle cx="102.6" cy="151.0" r="2.3"/><circle cx="93.3" cy="222.8" r="2"/><circle cx="49.5" cy="181.2" r="1.6"/><circle cx="88.8" cy="163.5" r="2"/><circle cx="107.7" cy="186.0" r="1.6"/><circle cx="57.2" cy="207.7" r="1.8"/><circle cx="110.6" cy="214.3" r="2.3"/><circle cx="128.5" cy="197.2" r="1.6"/><circle cx="95.2" cy="153.3" r="2"/><circle cx="110.3" cy="169.8" r="1.6"/><circle cx="80.0" cy="154.6" r="1.6"/><circle cx="64.8" cy="173.0" r="2"/><circle cx="115.9" cy="150.2" r="1.6"/><circle cx="55.0" cy="194.1" r="1.8"/><circle cx="127.8" cy="202.3" r="1.6"/><circle cx="64.4" cy="151.4" r="2"/><circle cx="102.7" cy="165.9" r="1.6"/><circle cx="63.7" cy="212.7" r="2.3"/><circle cx="122.9" cy="192.4" r="1.6"/><circle cx="99.8" cy="201.7" r="2"/><circle cx="129.6" cy="202.6" r="2.3"/><circle cx="107.7" cy="204.6" r="2"/><circle cx="58.8" cy="215.2" r="1.8"/><circle cx="119.0" cy="203.0" r="1.6"/><circle cx="50.8" cy="174.8" r="1.8"/><circle cx="110.0" cy="149.2" r="1.6"/><circle cx="86.7" cy="217.2" r="1.8"/><circle cx="64.7" cy="221.5" r="2"/><circle cx="109.2" cy="183.3" r="1.6"/><circle cx="101.9" cy="207.8" r="1.8"/><circle cx="95.3" cy="219.9" r="1.8"/><circle cx="72.0" cy="175.5" r="2"/><circle cx="121.8" cy="188.8" r="2"/><circle cx="68.4" cy="213.3" r="1.8"/><circle cx="128.6" cy="176.9" r="2"/><circle cx="56.0" cy="184.5" r="2.3"/><circle cx="87.2" cy="178.4" r="1.8"/><circle cx="124.8" cy="164.0" r="2"/><circle cx="121.0" cy="158.9" r="2"/><circle cx="69.3" cy="206.2" r="1.6"/><circle cx="121.2" cy="210.2" r="2"/><circle cx="103.0" cy="192.6" r="1.6"/><circle cx="96.7" cy="205.9" r="1.6"/><circle cx="86.3" cy="196.9" r="1.6"/><circle cx="109.9" cy="188.0" r="1.8"/><circle cx="114.3" cy="204.5" r="2.3"/><circle cx="134.5" cy="194.9" r="1.8"/><circle cx="78.6" cy="176.4" r="2.3"/><circle cx="91.6" cy="215.1" r="1.6"/><circle cx="81.4" cy="200.1" r="2.3"/><circle cx="118.7" cy="150.7" r="2.3"/><circle cx="60.7" cy="194.8" r="2.3"/><circle cx="104.6" cy="195.6" r="2"/><circle cx="79.0" cy="207.8" r="1.8"/><circle cx="100.8" cy="171.7" r="1.8"/><circle cx="136.4" cy="194.5" r="2"/><circle cx="74.7" cy="184.9" r="1.8"/><circle cx="84.7" cy="186.0" r="1.8"/><circle cx="47.2" cy="180.0" r="2.3"/><circle cx="117.1" cy="158.9" r="2"/><circle cx="90.1" cy="215.8" r="1.6"/><circle cx="112.1" cy="223.0" r="1.8"/><circle cx="52.2" cy="179.7" r="1.6"/><circle cx="81.6" cy="207.1" r="1.6"/><circle cx="109.2" cy="145.7" r="2"/><circle cx="116.8" cy="155.0" r="2.3"/><circle cx="108.5" cy="152.0" r="1.8"/><circle cx="96.8" cy="220.7" r="1.6"/><circle cx="87.2" cy="194.2" r="1.6"/><circle cx="115.9" cy="192.2" r="2.3"/><circle cx="89.8" cy="226.2" r="2"/><circle cx="121.6" cy="179.7" r="1.8"/><circle cx="134.2" cy="170.4" r="2"/><circle cx="118.7" cy="180.3" r="1.6"/><circle cx="96.0" cy="209.5" r="2.3"/><circle cx="98.8" cy="207.6" r="1.8"/><circle cx="61.0" cy="157.3" r="1.8"/><circle cx="109.1" cy="161.2" r="2"/><circle cx="68.4" cy="154.3" r="2.3"/><circle cx="124.2" cy="207.0" r="1.6"/><circle cx="126.3" cy="166.2" r="2"/><circle cx="92.0" cy="156.2" r="2"/><circle cx="109.7" cy="224.8" r="2"/><circle cx="71.6" cy="223.8" r="2"/><circle cx="120.5" cy="182.9" r="1.8"/><circle cx="55.6" cy="214.0" r="1.6"/><circle cx="89.0" cy="169.3" r="2"/><circle cx="104.5" cy="200.8" r="1.8"/><circle cx="126.1" cy="164.7" r="2"/><circle cx="117.4" cy="221.2" r="1.8"/><circle cx="129.0" cy="183.4" r="1.6"/><circle cx="71.9" cy="215.5" r="2"/><circle cx="95.7" cy="192.0" r="2.3"/><circle cx="128.5" cy="181.3" r="1.6"/><circle cx="48.2" cy="180.6" r="2.3"/><circle cx="52.7" cy="205.4" r="2"/><circle cx="101.7" cy="169.2" r="1.8"/><circle cx="91.7" cy="212.9" r="1.8"/><circle cx="94.1" cy="223.2" r="1.6"/><circle cx="90.2" cy="217.7" r="1.6"/><circle cx="121.8" cy="220.2" r="2"/><circle cx="73.1" cy="212.7" r="1.6"/><circle cx="54.1" cy="166.1" r="1.8"/><circle cx="53.3" cy="209.1" r="2.3"/><circle cx="58.5" cy="187.7" r="1.6"/><circle cx="85.8" cy="187.1" r="2.3"/><circle cx="73.7" cy="195.2" r="1.6"/><circle cx="133.1" cy="189.0" r="2"/><circle cx="106.8" cy="216.0" r="2"/><circle cx="86.7" cy="154.1" r="1.8"/><circle cx="76.8" cy="217.4" r="1.6"/><circle cx="53.7" cy="174.1" r="1.8"/><circle cx="119.1" cy="209.3" r="2.3"/><circle cx="92.2" cy="212.2" r="2"/><circle cx="96.6" cy="155.5" r="2.3"/><circle cx="54.9" cy="172.8" r="1.8"/><circle cx="118.1" cy="172.0" r="2"/><circle cx="67.1" cy="166.8" r="1.8"/><circle cx="53.8" cy="185.1" r="1.6"/><circle cx="59.9" cy="197.9" r="2.3"/><circle cx="47.8" cy="194.1" r="1.8"/><circle cx="78.5" cy="147.1" r="1.6"/><circle cx="113.9" cy="179.7" r="1.8"/><circle cx="50.4" cy="171.7" r="1.6"/><circle cx="101.1" cy="173.6" r="1.6"/><circle cx="114.1" cy="209.2" r="1.6"/><circle cx="112.3" cy="197.9" r="1.8"/><circle cx="125.7" cy="204.7" r="2"/><circle cx="101.2" cy="145.4" r="1.6"/><circle cx="114.0" cy="220.1" r="2.3"/><circle cx="82.7" cy="173.3" r="2.3"/><circle cx="125.5" cy="157.6" r="1.6"/><circle cx="100.5" cy="232.1" r="1.6"/><circle cx="66.2" cy="207.2" r="1.8"/><circle cx="133.9" cy="185.3" r="2.3"/><circle cx="108.0" cy="213.7" r="2"/><circle cx="65.3" cy="185.4" r="1.6"/><circle cx="100.7" cy="212.5" r="2.3"/><circle cx="90.9" cy="181.7" r="1.6"/></g>
+          <circle class="win mask-win" cx="268" cy="188" r="50"/>
+          <circle class="inside" cx="276" cy="178" r="3.4"/>
+          <text x="180" y="198" class="div" text-anchor="middle">÷</text>
+          <text x="92" y="254" class="val" text-anchor="middle">8,000</text>
+          <text x="268" y="254" class="val in" text-anchor="middle">40</text>
+          <text x="92" y="266" class="lab small" text-anchor="middle">particles per cm³</text>
+          <text x="268" y="266" class="lab small" text-anchor="middle">particles per cm³</text>
         </svg>
-        <div class="ff">Fit factor = 8,000 ÷ 40 = <b>200</b></div>
-        <p class="fig-note">One tube samples the room, the other samples the air inside the mask, while you breathe, talk and move. Example numbers.</p>
+        <div class="ff">8,000 ÷ 40 = fit factor <b>200</b></div>
+        <p class="fig-note">For every 200 particles in the room, 1 got inside the mask. The counter compares the two samples while you breathe, talk and move. Example numbers.</p>
       </div>
 
       <div class="state" data-state="4" hidden>
@@ -278,7 +292,7 @@
   <p class="foot">Protection factors here are UK HSE and US OSHA assigned ratings, and fit-test pass levels follow HSE and OSHA guidance for half masks and disposable respirators. The fit-test counts and the filter/edge split are illustrative examples. <a href="./">Try the mask picker</a> · <a href="details.html">Full comparison and sources</a>.</p>
 </div>
 
-<script src="shared.js"></script>
+<script src="shared.js?v=20261029"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
