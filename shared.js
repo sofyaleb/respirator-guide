@@ -242,8 +242,17 @@ window.RG = (() => {
           const e = q.t * q.t * (3 - 2 * q.t), mx = (q.sx + q.tx) / 2 + q.bend, my = (q.sy + q.ty) / 2 - Math.abs(q.bend) * .4;
           q.x = (1 - e) * (1 - e) * q.sx + 2 * (1 - e) * e * mx + e * e * q.tx;
           q.y = (1 - e) * (1 - e) * q.sy + 2 * (1 - e) * e * my + e * e * q.ty;
-          if (q.t >= 1) { q.s = q.fate === 'stop' ? 'stuck' : q.fate === 'filter' ? 'through' : 'leak'; q.ring = 0; q.trail = []; }
-        } else if (q.s === 'stuck') { q.a -= dt * .45; }
+          if (q.t >= 1) {
+            q.s = q.fate === 'stop' ? 'stuck' : q.fate === 'filter' ? 'through' : 'leak'; q.ring = 0; q.trail = [];
+            // red ones sit at the gap for a moment before slipping in; grey ones stay stuck to the mask for a while
+            q.hold = q.s === 'leak' && q.fate === 'edge' ? 1.4 + Math.random() * .8 : q.s === 'stuck' ? 2.2 + Math.random() * 1.2 : 0;
+          }
+        } else if (q.s === 'stuck') { if (q.hold > 0) q.hold -= dt; else q.a -= dt * .5; }
+        else if (q.hold > 0) {
+          // lingering at the edge: a small jiggle in place, with the ripple repeating
+          q.hold -= dt; q.ring = (q.ring + dt * 1.2) % 1;
+          q.x = q.tx + Math.sin(clock * 9 + q.sx) * 1.2; q.y = q.ty + Math.cos(clock * 7 + q.sy) * 1.2;
+        }
         else {
           q.ring += dt * 1.6;
           const sp = q.s === 'through' ? 16 : 34;
@@ -278,7 +287,8 @@ window.RG = (() => {
           ctx.beginPath(); ctx.moveTo(q.trail[0][0], q.trail[0][1]); q.trail.forEach(([x, y]) => ctx.lineTo(x, y)); ctx.stroke();
         }
         ctx.globalAlpha = a; ctx.fillStyle = col;
-        ctx.beginPath(); ctx.arc(q.x, q.y, q.s === 'stuck' ? q.r : q.r + .6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(q.x, q.y, q.s === 'stuck' ? q.r + .4 : q.r + (q.hold > 0 ? 1.2 : .6), 0, Math.PI * 2); ctx.fill();
+        if (q.s === 'stuck' && q.hold > 0) { ctx.globalAlpha = a * .5; ctx.strokeStyle = C['ink-soft']; ctx.lineWidth = .8; ctx.beginPath(); ctx.arc(q.x, q.y, q.r + 1.8, 0, Math.PI * 2); ctx.stroke(); }
       }
       ctx.globalAlpha = 1;
       parts = parts.filter((q) => q.a > 0);
