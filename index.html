@@ -168,7 +168,7 @@
     </div>
   </div>
 
-  <p class="foot">Protection factors assume the mask fits and is worn well. They are UK HSE and US OSHA ratings; cloth and surgical masks are rough estimates from studies. The split between filter and edges is illustrative, based on each standard's filter limit: on a good respirator, most of what gets in comes round the edges. Prices are typical US prices and vary. <a href="details.html">Full comparison and sources</a>.</p>
+  <p class="foot">Protection factors assume the mask fits and is worn well. They are UK HSE and US OSHA ratings; cloth and surgical masks are rough estimates from studies. The split between filter and edges is illustrative, based on each standard's filter limit: on a good respirator, most of what gets in comes round the edges. Prices are typical US prices and vary. Ear-loop fit figures are from a <a href="https://www.journalofhospitalinfection.com/article/S0195-6701(23)00030-0/fulltext" target="_blank" rel="noopener">2023 review of 29 studies</a>, via <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz's post on ear-loop FFP2s</a>. <a href="details.html">Full comparison and sources</a>.</p>
 </div>
 
 <script>
@@ -179,7 +179,8 @@
     { id: 'cloth', name: 'Cloth mask', tech: 'Reusable cloth face covering (no standard)', pf: 1.5, pfLabel: '~1–2×', filter: .4, price: 6, style: 'cloth', est: true, note: 'Washable and reusable, but air leaks round the edges. Fine as a cover, not as protection.' },
     { id: 'surgical', name: 'Face mask', tech: 'Surgical mask · EN 14683 Type I / II / IIR (US: ASTM F2100)', pf: 3, pfLabel: '~2–5×', filter: .1, price: 0.15, style: 'surgical', est: true, note: 'Blocks splashes and your own droplets. It sits loosely, so most of what you breathe comes round the sides.' },
     { id: 'ffp1', name: 'Dust mask', tech: 'FFP1 filtering facepiece · EN 149', pf: 4, pfLabel: '4×', filter: .2, price: 0.6, style: 'ffp', note: 'The basic sealed respirator. Good for nuisance dust, not for smoke or infections.' },
-    { id: 'ffp2', name: 'Disposable respirator', tech: 'FFP2 filtering facepiece (EN 149) · N95 (NIOSH) · KN95 (GB 2626)', pf: 10, pfLabel: '10×', filter: .06, price: 1, style: 'ffp', note: 'The everyday respirator for smoke, crowded places and viral illness. Pinch the nose clip for a good seal.' },
+    { id: 'ffp2', name: 'Disposable respirator', tech: 'FFP2 filtering facepiece (EN 149) · N95 (NIOSH) · KN95 (GB 2626), with head straps', pf: 10, pfLabel: '10×', filter: .06, price: 1, style: 'ffp', note: 'The everyday respirator for smoke, crowded places and viral illness. Pick one with head-and-neck straps, not ear loops, and pinch the nose clip for a good seal.' },
+    { id: 'ffp2ear', name: 'Ear-loop respirator', tech: 'FFP2 / KN95 with ear loops · not approved as N95 by NIOSH; UK HSE warns against them', pf: 3, pfLabel: 'often well under 10×', ill: true, noRec: true, filter: .06, price: 0.7, style: 'ffpear', note: 'Same filter, but ear loops rarely hold a seal. In a review of 29 fit-testing studies, about 4 in 100 ear-loop fit tests passed, against about 80 in 100 for folded respirators with head straps.' },
     { id: 'ffp3', name: 'High-protection disposable respirator', tech: 'FFP3 filtering facepiece · EN 149, often with an exhalation valve', pf: 20, pfLabel: '20×', filter: .01, price: 4, style: 'ffp3', note: 'The highest disposable class, used in high-risk healthcare. Often has a valve to make breathing out easier.' },
     { id: 'half', name: 'Half face respirator', tech: 'Reusable elastomeric half mask · EN 140, with P3 (EN 143) or NIOSH P100 filters', pf: 20, pfLabel: '10–20×', filter: .0005, price: 40, style: 'half', note: 'Rubber face piece with P3 or P100 filters you replace. Cheap per day if you wear one a lot.' },
     { id: 'full', name: 'Full face respirator', tech: 'Full-face mask · EN 136, with P3 (EN 143) or NIOSH P100 filters', pf: 40, pfLabel: '40–50×', filter: .0005, price: 200, style: 'full', note: 'Rubber mask with a clear visor and replaceable P3 or P100 filters. Covers your eyes too.' },
@@ -215,14 +216,15 @@
     budget.setAttribute('aria-valuetext', $('budget-out').textContent);
     setFill(prot); setFill(budget);
 
-    const fits = MASKS.filter((m) => m.pf >= p.min && m.price <= b).sort((x, y) => x.pf - y.pf || x.price - y.price);
+    const REC = MASKS.filter((m) => !m.noRec);
+    const fits = REC.filter((m) => m.pf >= p.min && m.price <= b).sort((x, y) => x.pf - y.pf || x.price - y.price);
     let best;
     if (fits.length) {
       best = fits[0];
       eyebrow = 'Best match'; hint = '';
     } else {
-      const strong = MASKS.filter((m) => m.pf >= p.min).sort((x, y) => x.price - y.price)[0];
-      const cheap = MASKS.filter((m) => m.price <= b).sort((x, y) => y.pf - x.pf || x.price - y.price)[0];
+      const strong = REC.filter((m) => m.pf >= p.min).sort((x, y) => x.price - y.price)[0];
+      const cheap = REC.filter((m) => m.price <= b).sort((x, y) => y.pf - x.pf || x.price - y.price)[0];
       best = cheap || strong;
       eyebrow = 'Nothing fits both. Closest within budget';
       hint = strong && strong !== best ? ` For ${p.label.split(' · ').pop()} you'd need a ${strong.name.toLowerCase()}, about ${money(strong.price)}.` : '';
@@ -236,7 +238,7 @@
     $('eyebrow').textContent = m === NONE ? 'Starting point' : m === current ? eyebrow : 'Comparing';
     $('pick').textContent = m.name;
     $('tech').textContent = m.tech;
-    $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : '');
+    $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : m.ill ? ' (illustrative)' : '');
     $('price').textContent = money(m.price);
     $('note').textContent = m.note + (m === current ? hint : '');
     $('through').textContent = `${s.total} in 100 get in`;
@@ -286,6 +288,7 @@
       cloth: { cx: 200, cy: 188, rx: 66, ry: 50, gaps: [[142, 152], [258, 152], [140, 222], [260, 222], [176, 142], [224, 142]] },
       surgical: { cx: 200, cy: 188, rx: 66, ry: 50, gaps: [[142, 152], [258, 152], [140, 222], [260, 222], [176, 142], [224, 142]] },
       ffp: { cx: 200, cy: 188, rx: 60, ry: 63, gaps: [[176, 131], [224, 131], [146, 198], [254, 198], [200, 249]] },
+      ffpear: { cx: 200, cy: 188, rx: 60, ry: 63, gaps: [[172, 132], [228, 132], [146, 170], [254, 170], [146, 212], [254, 212], [200, 249]] },
       ffp3: { cx: 200, cy: 188, rx: 60, ry: 63, gaps: [[176, 131], [224, 131], [146, 198], [254, 198], [200, 249]] },
       half: { cx: 200, cy: 194, rx: 82, ry: 50, gaps: [[186, 127], [214, 127], [168, 232], [232, 232]] },
       papr: { cx: 200, cy: 190, rx: 48, ry: 56, gaps: [[186, 127], [214, 127], [168, 232], [232, 232]] },
@@ -377,6 +380,17 @@
         ctx.strokeStyle = C['accent']; ctx.lineWidth = 3; ctx.stroke(S.cup);
         line([200, 134, 204, 190, 200, 244], 1, C['ink-soft'], .35, true);
         line([180, 135, 200, 129, 220, 135], 3.5, C['ink-soft'], .75, true);
+      } else if (s === 'ffpear') {
+        // FFP2 / KN95 with ear loops: the loops pull the edges away from the cheeks, leaving gaps
+        both(() => { line([146, 158, 120, 126, 116, 140], 1.8, C['ink-soft'], .7, true); line([150, 214, 122, 196, 118, 150], 1.8, C['ink-soft'], .7, true); });
+        ctx.fillStyle = C['surface']; ctx.fill(S.cup);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 2.4; ctx.stroke(S.cup);
+        line([200, 134, 204, 190, 200, 244], 1, C['ink-soft'], .35, true);
+        line([180, 135, 200, 129, 220, 135], 3, C['ink-soft'], .6, true);
+        // gaps where the edge lifts off the face
+        ctx.strokeStyle = C['edge']; ctx.lineWidth = 2.4; ctx.setLineDash([3, 4]);
+        both(() => { ctx.beginPath(); ctx.moveTo(147, 158); ctx.quadraticCurveTo(140, 184, 148, 214); ctx.stroke(); ctx.beginPath(); ctx.moveTo(174, 132); ctx.quadraticCurveTo(160, 138, 152, 150); ctx.stroke(); });
+        ctx.setLineDash([]);
       } else if (s === 'ffp3') {
         // FFP3: three-panel fold-flat respirator (3M Aura 9332 style), red head straps, wide nose foam, big front valve
         both(() => { line([146, 150, 132, 124, 124, 108], 3, C['strap3'], .95, true); line([148, 214, 136, 226, 128, 218], 3, C['strap3'], .95, true); });
