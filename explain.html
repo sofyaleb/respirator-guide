@@ -150,6 +150,26 @@
   .end { position: absolute; top: 1.2rem; font-size: .65rem; color: var(--ink-soft); }
   .end.l { transform: translateX(-120%); } .end.r { transform: translateX(120%); }
   .end.l { left: 0; top: .35rem; } .end.r { right: 0; top: .35rem; }
+  .clockrow { display: flex; gap: 1rem; align-items: center; }
+  .clock { flex: none; }
+  .clock .face { fill: var(--bg); stroke: var(--line); stroke-width: 2; }
+  .clock .sweep { fill: var(--accent-soft); }
+  .clock .hand { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+  .clock .hub { fill: var(--accent); }
+  .playrow { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
+  .playbtn, .scen { font: inherit; font-size: .8rem; padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-soft); cursor: pointer; }
+  .playbtn { background: var(--ink); border-color: var(--ink); color: var(--bg); font-weight: 600; }
+  .scen:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .playbtn:focus-visible, .scen:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #t-slider { width: 100%; }
+  .trows { display: grid; gap: .7rem; }
+  .trow { display: grid; gap: .25rem; }
+  .trow-top { display: flex; justify-content: space-between; gap: 1rem; font-size: .82rem; }
+  .trow-top span { color: var(--ink-soft); }
+  .trow-top b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ttrack { height: 12px; border-radius: 6px; background: var(--dot); overflow: hidden; }
+  .ttrack i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--accent); }
+  .ttrack i.none { background: var(--edge); }
   .state { display: grid; gap: 1rem; }
   @media (prefers-reduced-motion: no-preference) { .state:not([hidden]) { animation: rise .45s ease; } }
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -219,7 +239,7 @@
         <p class="formula">Time spent ÷ protection factor = the same as this long with no mask</p>
         <p>An 8-hour flight in a disposable respirator (10×) adds up to about 48 minutes unmasked. In a face mask (about 3×) the same flight adds up to about 2 hours 40 minutes.</p>
         <p>Two things make the clock run faster: more particles in the air, as in crowded, stuffy rooms or smoke, and breathing harder, as when exercising or talking loudly. That is where a better-fitting, higher-protection mask makes the biggest difference.</p>
-        <p class="soft">Simplified: real exposure also depends on ventilation and how close you are to the source. Try your own numbers with the calculator.</p>
+        <p class="soft">Simplified: real exposure also depends on ventilation and how close you are to the source. Press play to watch the hours add up for each mask.</p>
       </section>
     </div>
     <div class="pager">
@@ -321,27 +341,27 @@
       </div>
 
       <div class="state" data-state="5" hidden>
-        <span class="fig-title">Time calculator</span>
-        <div class="calc">
-          <label for="c-mask">Mask</label>
-          <select id="c-mask">
-            <option value="1">No mask (1×)</option>
-            <option value="3">Face mask (about 3×)</option>
-            <option value="4">Dust mask, FFP1 (4×)</option>
-            <option value="10" selected>Disposable respirator, FFP2 / N95 (10×)</option>
-            <option value="20">High-protection disposable, FFP3 (20×)</option>
-            <option value="20">Half face respirator (up to 20×)</option>
-            <option value="40">Full face respirator (40×)</option>
-          </select>
-          <label for="c-hours">Time in the same air <output id="c-hours-out">8 hours</output></label>
-          <input type="range" id="c-hours" min="1" max="12" step="1" value="8">
+        <span class="fig-title">Watch the time add up</span>
+        <div class="clockrow">
+          <svg class="clock" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+            <circle cx="32" cy="32" r="29" class="face"/>
+            <path id="clk-fill" class="sweep" d=""/>
+            <line x1="32" y1="32" x2="32" y2="10" class="hand" id="clk-hand"/>
+            <circle cx="32" cy="32" r="2.5" class="hub"/>
+          </svg>
+          <div>
+            <div class="fig-big" id="t-label">0 hours</div>
+            <div class="playrow">
+              <button type="button" class="playbtn" id="t-play" aria-label="Play">▶ Play</button>
+              <button type="button" class="scen" data-h="0.5">Bus ride · 30 min</button>
+              <button type="button" class="scen" data-h="8">Flight · 8 h</button>
+              <button type="button" class="scen" data-h="10">Work day · 10 h</button>
+            </div>
+          </div>
         </div>
-        <div class="fig-big" id="c-result">—</div>
-        <p class="fig-note" id="c-math"></p>
-        <div class="timeline">
-          <span>Without a mask</span><div class="tl"><span id="tl-none"></span></div>
-          <span id="tl-label">With this mask</span><div class="tl"><span id="tl-mask"></span></div>
-        </div>
+        <input type="range" id="t-slider" min="0" max="720" step="5" value="0" aria-label="Time in the same air">
+        <div class="trows" id="t-rows"></div>
+        <p class="fig-note">Each bar is what you have breathed in so far, shown as the same amount of time with no mask. The full width is 12 hours with no mask.</p>
       </div>
     </aside>
   </div>
@@ -419,19 +439,57 @@
   document.querySelectorAll('.fitbtn').forEach((b) => b.addEventListener('click', () => drawFit(+b.dataset.ff)));
   drawFit(200);
 
-  // 5 · time calculator
-  const draw4 = () => {
-    const pf = +$('c-mask').value, h = +$('c-hours').value, eq = h / pf;
-    $('c-hours-out').textContent = `${h} hour${h > 1 ? 's' : ''}`;
-    const mins = Math.round(eq * 60), hh = Math.floor(mins / 60), mm = mins % 60;
-    const eqText = mins < 60 ? `${mins} minutes` : `${hh} hour${hh > 1 ? 's' : ''}${mm ? ` ${mm} minutes` : ''}`;
-    $('c-result').textContent = pf === 1 ? `${h} hour${h > 1 ? 's' : ''} of full exposure` : `Like ${eqText} with no mask`;
-    $('c-math').textContent = pf === 1 ? 'With no mask, every minute counts in full.' : `${h} hour${h > 1 ? 's' : ''} ÷ ${pf} = ${eqText}. The bars compare what you breathe in.`;
-    $('tl-none').style.width = '100%';
-    $('tl-mask').style.width = `${Math.max(1, 100 / pf)}%`;
-    $('tl-label').textContent = $('c-mask').selectedOptions[0].textContent;
+  // 6 · time passing: every mask's breathed-in amount grows as the clock runs
+  const TMASKS = [['No mask', 1], ['Face mask', 3], ['Disposable respirator', 10], ['High-protection disposable', 20], ['Full face respirator', 40]];
+  const MAXMIN = 720;
+  const fmt = (m) => { m = Math.round(m); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${r} min` : `${h} h`; };
+  const rowsEl = $('t-rows');
+  const rows = TMASKS.map(([name, pf]) => {
+    const row = document.createElement('div'); row.className = 'trow';
+    const top = document.createElement('div'); top.className = 'trow-top';
+    const n = document.createElement('span'); n.textContent = `${name}${pf > 1 ? ` (${pf}×)` : ''}`;
+    const v = document.createElement('b');
+    top.append(n, v);
+    const track = document.createElement('div'); track.className = 'ttrack';
+    const fill = document.createElement('i'); if (pf === 1) fill.className = 'none'; track.appendChild(fill);
+    row.append(top, track); rowsEl.appendChild(row);
+    return { pf, v, fill };
+  });
+  let now6 = 0;
+  const setTime = (min) => {
+    min = Math.max(0, Math.min(MAXMIN, min)); now6 = min;
+    $('t-slider').value = min; $('t-slider').style.setProperty('--fill', `${min / MAXMIN * 100}%`);
+    $('t-label').textContent = min === 0 ? '0 hours' : fmt(min);
+    rows.forEach((r) => {
+      const eq = min / r.pf;
+      r.fill.style.width = `${eq / MAXMIN * 100}%`;
+      r.v.textContent = min === 0 ? '—' : r.pf === 1 ? `${fmt(eq)} breathed in` : `like ${fmt(eq)} with no mask`;
+    });
+    // clock: hand and a filled sweep for the current hour, one full turn per 12 hours
+    const a = (min / MAXMIN) * Math.PI * 2, x = 32 + Math.sin(a) * 22, y = 32 - Math.cos(a) * 22;
+    $('clk-hand').setAttribute('x2', x.toFixed(2)); $('clk-hand').setAttribute('y2', y.toFixed(2));
+    const big = a > Math.PI ? 1 : 0, ex = 32 + Math.sin(a) * 26, ey = 32 - Math.cos(a) * 26;
+    $('clk-fill').setAttribute('d', min >= MAXMIN ? 'M32 6 A26 26 0 1 1 31.99 6 Z' : min === 0 ? '' : `M32 32 L32 6 A26 26 0 ${big} 1 ${ex.toFixed(2)} ${ey.toFixed(2)} Z`);
   };
-  $('c-mask').addEventListener('change', draw4); $('c-hours').addEventListener('input', draw4); draw4();
+  let playing = false, raf = 0, lastT = 0;
+  const stop = () => { playing = false; cancelAnimationFrame(raf); $('t-play').textContent = '▶ Play'; $('t-play').setAttribute('aria-label', 'Play'); };
+  const tick = (now) => {
+    if (!playing) return;
+    const dt = lastT ? Math.min(.1, (now - lastT) / 1000) : 0; lastT = now;
+    const next = now6 + dt * 60; // one hour of time per second
+    setTime(next);
+    if (next >= MAXMIN) { stop(); return; }
+    raf = requestAnimationFrame(tick);
+  };
+  $('t-play').addEventListener('click', () => {
+    if (playing) { stop(); return; }
+    if (now6 >= MAXMIN) setTime(0);
+    playing = true; lastT = 0; $('t-play').textContent = '❚❚ Pause'; $('t-play').setAttribute('aria-label', 'Pause');
+    raf = requestAnimationFrame(tick);
+  });
+  $('t-slider').addEventListener('input', () => { stop(); setTime(+$('t-slider').value); });
+  document.querySelectorAll('.scen').forEach((b) => b.addEventListener('click', () => { stop(); setTime(+b.dataset.h * 60); }));
+  setTime(480);
 
   // side-to-side steps: the diagram follows whichever step is in view
   const track = $('track'), steps = [...track.querySelectorAll('.ch')], states = [...document.querySelectorAll('.state')];
