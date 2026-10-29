@@ -86,6 +86,8 @@
   .eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
   .pick { font-size: clamp(1.75rem, 3.5vw, 2.25rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.15; margin: 0; }
   .tech { margin: 0 0 .35rem; font-size: .85rem; color: var(--ink-soft); line-height: 1.4; }
+  .src { margin: .15rem 0 0; font-size: .8rem; color: var(--ink-soft); }
+  .src a { color: var(--ink); }
   .facts { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .facts b { color: var(--ink); font-weight: 600; }
   .note { color: var(--ink-soft); font-size: .9rem; margin: .25rem 0 0; }
@@ -150,6 +152,7 @@
           <span>Typical price <b id="price">$0</b> each</span>
         </div>
         <p class="note" id="note"></p>
+        <p class="src" id="src" hidden>Source: <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz, “Stop using ear-loop FFP2 respirators”, Gloze Matrix (2026)</a>, citing a 2023 review in the Journal of Hospital Infection.</p>
         <div class="alts" id="alts"></div>
       </section>
 
@@ -241,6 +244,7 @@
     $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : m.ill ? ' (illustrative)' : '');
     $('price').textContent = money(m.price);
     $('note').textContent = m.note + (m === current ? hint : '');
+    $('src').hidden = !(m.id === 'ffp2' || m.id === 'ffp2ear');
     $('through').textContent = `${s.total} in 100 get in`;
     $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge; $('n-straight').textContent = s.straight;
     $('leg-straight').hidden = !s.straight;
