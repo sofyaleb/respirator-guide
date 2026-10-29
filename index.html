@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Respirator Protection Compared</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  :root {
+    --font-anthropic-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-anthropic-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --cds-font-size-caption: 0.8125rem;
+    --cds-font-size-body: 1rem;
+    --cds-font-size-heading: 1.125rem;
+    --cds-font-size-title: 2rem;
+    --cds-font-weight-medium: 500;
+    --cds-gap-xs: 0.25rem; --cds-gap-sm: 0.5rem; --cds-gap-md: 1rem; --cds-gap-lg: 1.5rem; --cds-gap-xl: 2.25rem;
+    --cds-pad-xs: 0.375rem; --cds-pad-sm: 0.625rem; --cds-pad-md: 1rem; --cds-pad-lg: 1.25rem;
+    --cds-radius: 8px;
+    --cds-dur-slow: 300ms;
+    --color-bg: #f6f7f8;
+    --color-panel: #ffffff;
+    --color-fg: #1c2329;
+    --color-fg-muted: #5b6670;
+    --color-border-line: #dfe3e7;
+    --color-bad: #c0392b;
+    --cds-chart-grid: #e7eaed;
+    --cds-surface-popover: #ffffff;
+    --cds-border: #d3d8dd;
+    --cds-shadow-popover: 0 6px 20px rgba(20, 30, 40, 0.12);
+    --cds-text-secondary: #5b6670;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-bg: #13181c; --color-panel: #1b2126; --color-fg: #e8ecef; --color-fg-muted: #9aa5ae;
+      --color-border-line: #2c353c; --color-bad: #ef6b5b; --cds-chart-grid: #262e34;
+      --cds-surface-popover: #222a30; --cds-border: #36414a; --cds-shadow-popover: 0 6px 20px rgba(0,0,0,.45);
+      --cds-text-secondary: #9aa5ae; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --color-bg: #13181c; --color-panel: #1b2126; --color-fg: #e8ecef; --color-fg-muted: #9aa5ae;
+    --color-border-line: #2c353c; --color-bad: #ef6b5b; --cds-chart-grid: #262e34;
+    --cds-surface-popover: #222a30; --cds-border: #36414a; --cds-shadow-popover: 0 6px 20px rgba(0,0,0,.45);
+    --cds-text-secondary: #9aa5ae; color-scheme: dark;
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: 15px; }
+  #dash-root { padding-block: 2.5rem 4rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .dash-skeleton { background: var(--color-border-line); border-radius: var(--cds-radius); opacity: .5; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div id="dash-root">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+  // Minimal stand-in for the claude.ai dashboard runtime, so the page runs as a plain file.
+  window.dash = (() => {
+    const DATA = [{"id": "cloth", "name": "Cloth mask", "family": "Everyday masks", "standard": "None", "region": "Any", "kind": "estimate", "pf_low": 1, "pf_high": 2, "pf_short": "~1–2×", "pf_label": "About 1–2× (estimate)", "basis": "Rough range from lab and fit studies. There is no standard or official rating.", "filtration_label": "Varies widely", "leakage_label": "No standard", "fit_test": "No", "reusable": "Yes (washable)", "valve": "No", "breathability": "Easy", "cost": "Very low"}, {"id": "surgical", "name": "Surgical mask (Type I / II / IIR)", "family": "Everyday masks", "standard": "EN 14683", "region": "EU / UK", "kind": "estimate", "pf_low": 1.5, "pf_high": 3, "pf_short": "~1.5–3×", "pf_label": "About 1.5–3× (estimate)", "basis": "Rough range from fit studies. Surgical masks are not designed to seal, so there is no official factor.", "filtration_label": "95–98% of bacteria (larger particles, ~3 µm)", "leakage_label": "Not tested (no seal)", "fit_test": "No (does not seal)", "reusable": "No", "valve": "No", "breathability": "Easy", "cost": "Very low"}, {"id": "ffp1", "name": "FFP1", "family": "EU (EN 149)", "standard": "EN 149", "region": "EU / UK", "kind": "official", "pf_low": 4, "pf_high": 4, "pf_short": "4×", "pf_label": "4×", "basis": "UK HSE assigned protection factor.", "filtration_label": "≥80%", "leakage_label": "≤22%", "fit_test": "Recommended; required at work", "reusable": "No", "valve": "With or without", "breathability": "Easy", "cost": "Low"}, {"id": "ffp2", "name": "FFP2", "family": "EU (EN 149)", "standard": "EN 149", "region": "EU / UK", "kind": "official", "pf_low": 10, "pf_high": 10, "pf_short": "10×", "pf_label": "10×", "basis": "UK HSE assigned protection factor.", "filtration_label": "≥94%", "leakage_label": "≤8%", "fit_test": "Recommended; required at work", "reusable": "No", "valve": "With or without", "breathability": "Moderate", "cost": "Low"}, {"id": "ffp3", "name": "FFP3", "family": "EU (EN 149)", "standard": "EN 149", "region": "EU / UK", "kind": "official", "pf_low": 20, "pf_high": 20, "pf_short": "20×", "pf_label": "20×", "basis": "UK HSE assigned protection factor.", "filtration_label": "≥99%", "leakage_label": "≤2%", "fit_test": "Recommended; required at work", "reusable": "No", "valve": "With or without", "breathability": "Harder", "cost": "Medium"}, {"id": "n95", "name": "N95", "family": "US (NIOSH)", "standard": "NIOSH 42 CFR 84", "region": "US", "kind": "official", "pf_low": 10, "pf_high": 10, "pf_short": "10×", "pf_label": "10×", "basis": "US OSHA assigned protection factor for filtering facepieces.", "filtration_label": "≥95%", "leakage_label": "Not part of the rating (filter only)", "fit_test": "Recommended; required at work", "reusable": "No", "valve": "With or without", "breathability": "Moderate", "cost": "Low"}, {"id": "n100", "name": "N100 / P100 (disposable)", "family": "US (NIOSH)", "standard": "NIOSH 42 CFR 84", "region": "US", "kind": "official", "pf_low": 10, "pf_high": 10, "pf_short": "10×", "pf_label": "10×", "basis": "US OSHA assigned protection factor. It is the same as N95 because leakage around the face limits protection, not the filter.", "filtration_label": "≥99.97%", "leakage_label": "Not part of the rating (filter only)", "fit_test": "Recommended; required at work", "reusable": "No", "valve": "Usually with", "breathability": "Harder", "cost": "Medium"}, {"id": "kn95", "name": "KN95", "family": "International", "standard": "GB 2626", "region": "China", "kind": "equivalent", "pf_low": 10, "pf_high": 10, "pf_short": "~10×", "pf_label": "About 10× (by equivalence)", "basis": "No factor of its own here. Treated as equivalent to N95 and FFP2 for non-oil particles (3M comparison).", "filtration_label": "≥95%", "leakage_label": "≤8%", "fit_test": "Recommended", "reusable": "No", "valve": "With or without", "breathability": "Moderate", "cost": "Low"}, {"id": "kf94", "name": "KF94", "family": "International", "standard": "Korea 1st class", "region": "South Korea", "kind": "equivalent", "pf_low": 10, "pf_high": 10, "pf_short": "~10×", "pf_label": "About 10× (by equivalence)", "basis": "No factor of its own here. Treated as equivalent to N95 and FFP2 for non-oil particles (3M comparison).", "filtration_label": "≥94%", "leakage_label": "≤11%", "fit_test": "Recommended", "reusable": "No", "valve": "Usually without", "breathability": "Moderate", "cost": "Low"}, {"id": "p2", "name": "P2", "family": "International", "standard": "AS/NZS 1716", "region": "Australia / NZ", "kind": "official", "pf_low": 10, "pf_high": 10, "pf_short": "10×", "pf_label": "10×", "basis": "Required protection factor for a P2 half-face respirator under AS/NZS 1715.", "filtration_label": "≥94%", "leakage_label": "≤8%", "fit_test": "Recommended; required at work", "reusable": "No", "valve": "With or without", "breathability": "Moderate", "cost": "Low"}, {"id": "ds2", "name": "DS2", "family": "International", "standard": "Japan MHLW", "region": "Japan", "kind": "equivalent", "pf_low": 10, "pf_high": 10, "pf_short": "~10×", "pf_label": "About 10× (by equivalence)", "basis": "No factor of its own here. Treated as equivalent to N95 and FFP2 for non-oil particles (3M comparison).", "filtration_label": "≥95%", "leakage_label": "Not covered here", "fit_test": "Recommended", "reusable": "No", "valve": "With or without", "breathability": "Moderate", "cost": "Low"}, {"id": "halfmask", "name": "Reusable half mask (P3 / P100 filters)", "family": "Reusable & powered", "standard": "EN 140 + EN 143 / NIOSH", "region": "EU / UK / US", "kind": "official", "pf_low": 10, "pf_high": 20, "pf_short": "10–20×", "pf_label": "10× (US OSHA) to 20× (UK HSE)", "basis": "US OSHA gives 10×, UK HSE gives 20× for a half mask with P3 filters.", "filtration_label": "≥99.95% (P3) / ≥99.97% (P100)", "leakage_label": "≤2% (EN 140 half mask)", "fit_test": "Required at work", "reusable": "Yes (replace filters)", "valve": "Yes (exhalation valve)", "breathability": "Moderate", "cost": "High upfront, low per use"}, {"id": "papr_loose", "name": "Powered respirator (loose hood)", "family": "Reusable & powered", "standard": "NIOSH / EN 12941", "region": "EU / UK / US", "kind": "official", "pf_low": 25, "pf_high": 25, "pf_short": "25×", "pf_label": "25×", "basis": "US OSHA assigned protection factor for a loose-fitting PAPR.", "filtration_label": "High-efficiency filters", "leakage_label": "Depends on class", "fit_test": "Not needed (no seal)", "reusable": "Yes", "valve": "n/a (fan-driven)", "breathability": "Easy (fan-driven)", "cost": "Very high"}, {"id": "papr_half", "name": "Powered respirator (tight half mask)", "family": "Reusable & powered", "standard": "NIOSH / EN 12942", "region": "EU / UK / US", "kind": "official", "pf_low": 50, "pf_high": 50, "pf_short": "50×", "pf_label": "50×", "basis": "US OSHA assigned protection factor for a half-facepiece PAPR.", "filtration_label": "High-efficiency filters", "leakage_label": "Depends on class", "fit_test": "Required at work", "reusable": "Yes", "valve": "n/a (fan-driven)", "breathability": "Easy (fan-driven)", "cost": "Very high"}];
+    const draws = {};
+    const dark = () => {
+      const t = document.documentElement.dataset.theme;
+      return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    };
+    const run = (name) => document.querySelectorAll('[data-draw="' + name + '"]').forEach((el) => draws[name](el));
+    const api = {
+      get colors() {
+        return dark()
+          ? ['#9aa7b4', '#6ea8ff', '#ff9f5a', '#4fd1b5', '#c79bff', '#ff8aa8', '#e6c65c', '#7fd36b']
+          : ['#7b8794', '#2f6fd6', '#d56a1e', '#13917c', '#7c4dcc', '#c8436a', '#b08a12', '#3f9a2f'];
+      },
+      data: () => ({ status: 'ok', data: DATA, columns: Object.keys(DATA[0] || {}), refreshing: false, meta: [] }),
+      draw(name, fn) { if (fn) draws[name] = fn; else if (draws[name]) run(name); },
+      runAll() { Object.keys(draws).forEach(run); },
+    };
+    return api;
+  })();
+</script>
+<style>
+  .rp { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); max-width: 72rem; margin-inline: auto; }
+  .rp-head { display: grid; gap: var(--cds-gap-sm); }
+  .rp-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .rp-lede { margin: 0; max-width: 62ch; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); line-height: 1.55; }
+  .rp-lede b, .rp-tile b { font-weight: 600; color: var(--color-fg); }
+  .rp-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--cds-gap-md); }
+  .rp-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+  .rp-tile { display: grid; gap: var(--cds-gap-xs); }
+  .rp-tile .rp-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .06em; }
+  .rp-tile .rp-v { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); font-weight: 400; font-variant-numeric: tabular-nums; }
+  .rp-tile .rp-n { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; }
+  .rp-section { display: grid; gap: var(--cds-gap-md); }
+  .rp-h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .rp-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.5; max-width: 70ch; }
+  .rp-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .rp-chip { font: inherit; font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg-muted); cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; }
+  .rp-chip[aria-pressed="true"] { color: var(--color-fg); background: var(--color-panel); border-color: var(--color-fg-muted); }
+  .rp-chip:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .rp-sw { width: .65rem; height: .65rem; border-radius: 2px; display: inline-block; }
+  .rp-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rp-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+  .rp-key { width: 1.4rem; height: .6rem; border-radius: 2px; background: var(--color-fg-muted); display: inline-block; }
+  .rp-key.eq { opacity: .55; }
+  .rp-key.est { background: transparent; border: 1.5px dashed var(--color-fg-muted); }
+  .rp-chart { position: relative; min-height: 24rem; }
+  .rp-chart svg { display: block; }
+  .rp-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); max-width: 18rem; line-height: 1.45; z-index: 2; }
+  .rp-tip .rp-tip-h { color: var(--cds-text-secondary); }
+  .rp-tip .rp-tip-v { font-weight: 600; }
+  .rp-fail { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: inherit; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .rp-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+  .rp-tablewrap { overflow-x: auto; }
+  .rp-table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .rp-table th, .rp-table td { text-align: left; vertical-align: top; padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); }
+  .rp-table th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+  .rp-table td:first-child { font-weight: 600; white-space: nowrap; }
+  .rp-table td.rp-pf { white-space: nowrap; }
+  .rp-grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--cds-gap-md); }
+  .rp-card h3 { margin: 0 0 var(--cds-gap-xs); font-size: var(--cds-font-size-body); font-weight: 600; }
+  .rp-card p { margin: 0; line-height: 1.55; color: var(--color-fg-muted); }
+  .rp-card p + p { margin-top: var(--cds-gap-sm); }
+  .rp-defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md) var(--cds-gap-lg); margin: 0; }
+  .rp-defs div { min-width: 0; }
+  .rp-defs dt { font-weight: 600; margin-bottom: var(--cds-gap-xs); }
+  .rp-defs dd { margin: 0; color: var(--color-fg-muted); line-height: 1.55; }
+  .rp-src { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .rp-src a { color: var(--color-fg); }
+  [data-dash-source-state=empty] { color: transparent; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="rp">
+  <header class="rp-head">
+    <h1 class="rp-title">Respirator protection compared</h1>
+    <p class="rp-lede">A well-fitted FFP2 or N95 cuts the particles you breathe in by about <b data-draw="cell" data-source="masks" data-field="pf_short" data-where="id=ffp2">—</b>. A surgical mask manages roughly <b data-draw="cell" data-source="masks" data-field="pf_short" data-where="id=surgical">—</b>, because air leaks round its edges. How well a mask seals to your face matters as much as the label.</p>
+  </header>
+
+  <div class="rp-tiles">
+    <div class="rp-card rp-tile">
+      <span class="rp-k">Surgical mask</span>
+      <span class="rp-v" data-draw="cell" data-source="masks" data-field="pf_short" data-where="id=surgical">—</span>
+      <span class="rp-n">Estimate from fit studies. Designed to stop splashes and the wearer's droplets, not to seal.</span>
+    </div>
+    <div class="rp-card rp-tile">
+      <span class="rp-k">FFP2 · N95 · KN95</span>
+      <span class="rp-v" data-draw="cell" data-source="masks" data-field="pf_short" data-where="id=ffp2">—</span>
+      <span class="rp-n">The everyday respirator tier. Different countries' versions are broadly equivalent.</span>
+    </div>
+    <div class="rp-card rp-tile">
+      <span class="rp-k">FFP3</span>
+      <span class="rp-v" data-draw="cell" data-source="masks" data-field="pf_short" data-where="id=ffp3">—</span>
+      <span class="rp-n">The highest disposable class in Europe, used for high-risk healthcare and dusty work.</span>
+    </div>
+    <div class="rp-card rp-tile">
+      <span class="rp-k">Powered respirator</span>
+      <span class="rp-v" data-draw="cell" data-source="masks" data-field="pf_short" data-where="id=papr_half">—</span>
+      <span class="rp-n">A fan pushes filtered air into a tight half mask. Workplace equipment, not everyday wear.</span>
+    </div>
+  </div>
+
+  <section class="rp-section rp-card" id="ladder">
+    <div>
+      <h2 class="rp-h2">The protection ladder</h2>
+      <p class="rp-note">How many times less airborne particle each type lets you breathe in, when worn and fitted properly. The scale is logarithmic, so each step to the right is a multiple. Hover or tap a row for where its number comes from.</p>
+    </div>
+    <div class="rp-chips" role="group" aria-label="Show mask families">
+      <button type="button" class="rp-chip" id="chip-everyday" data-family="Everyday masks" aria-pressed="true"><i class="rp-sw"></i>Everyday masks</button>
+      <button type="button" class="rp-chip" id="chip-eu" data-family="EU (EN 149)" aria-pressed="true"><i class="rp-sw"></i>EU (EN 149)</button>
+      <button type="button" class="rp-chip" id="chip-us" data-family="US (NIOSH)" aria-pressed="true"><i class="rp-sw"></i>US (NIOSH)</button>
+      <button type="button" class="rp-chip" id="chip-intl" data-family="International" aria-pressed="true"><i class="rp-sw"></i>International</button>
+      <button type="button" class="rp-chip" id="chip-reuse" data-family="Reusable &amp; powered" aria-pressed="true"><i class="rp-sw"></i>Reusable &amp; powered</button>
+    </div>
+    <div class="rp-chart dash-skeleton" data-draw="ladder" data-source="masks"></div>
+    <div class="rp-legend">
+      <span><i class="rp-key"></i>Official protection factor</span>
+      <span><i class="rp-key eq"></i>Equivalent class, no factor of its own</span>
+      <span><i class="rp-key est"></i>Estimate from studies (no official rating)</span>
+    </div>
+  </section>
+
+  <section class="rp-section">
+    <h2 class="rp-h2">What the terms mean</h2>
+    <dl class="rp-defs">
+      <div><dt>Protection factor</dt><dd>How many times less contaminant reaches your lungs compared with the air outside. A factor of ten means you breathe a tenth of what is around you. Official "assigned" factors come from workplace safety bodies and assume the mask fits and is worn correctly.</dd></div>
+      <div><dt>Filter efficiency</dt><dd>The share of test particles the filter material stops in the lab. It says nothing about air that sneaks round the edges, which is why a high filter number alone can mislead.</dd></div>
+      <div><dt>Total inward leakage</dt><dd>Everything that gets past the mask on a real person: through the filter, round the face seal and through any valve. European and several Asian standards test this; the US rating tests the filter only and relies on fit testing at work.</dd></div>
+      <div><dt>Fit test</dt><dd>A check, usually with a taste test or a particle counter, that a specific mask model seals on your face. A quick "fit check" each time you put it on is different, and is something everyone can do.</dd></div>
+      <div><dt>N, R and P</dt><dd>In US ratings the letter is about oil. N is not resistant to oily particles, R is somewhat resistant and P is strongly resistant. For everyday air, smoke and viruses, N is fine.</dd></div>
+      <div><dt>NR and R markings</dt><dd>On EU masks, NR means single shift only and R means it can be reused. A D marking means it passed an extra clogging test with dolomite dust.</dd></div>
+    </dl>
+  </section>
+
+  <section class="rp-section rp-card" id="table">
+    <div>
+      <h2 class="rp-h2">Side by side</h2>
+      <p class="rp-note">The minimum the standard requires. Real masks often do better. The filter chips above also filter this table.</p>
+    </div>
+    <div class="rp-tablewrap">
+      <table class="rp-table" data-source="masks" data-row-key="name">
+        <thead>
+          <tr>
+            <th data-field="name">Type</th>
+            <th data-field="standard">Standard</th>
+            <th data-field="region">Region</th>
+            <th data-field="pf_label">Protection factor</th>
+            <th data-field="filtration_label">Filter efficiency (min)</th>
+            <th data-field="leakage_label">Inward leakage (max)</th>
+            <th data-field="fit_test">Fit test</th>
+            <th data-field="reusable">Reusable</th>
+            <th data-field="valve">Valve</th>
+            <th data-field="breathability">Breathing</th>
+            <th data-field="cost">Cost</th>
+          </tr>
+        </thead>
+        <tbody data-draw="table"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="rp-section" id="fit">
+    <h2 class="rp-h2">Why fit matters more than the class</h2>
+    <div class="rp-grid3">
+      <div class="rp-card">
+        <h3>Air takes the easy way in</h3>
+        <p>Breathing pulls air through whatever path resists least. A gap at the nose or cheek lets unfiltered air bypass the filter entirely.</p>
+        <p>That is why a disposable N100 gets the same official factor as an N95: past a point, the seal limits protection, not the filter.</p>
+      </div>
+      <div class="rp-card">
+        <h3>What breaks a seal</h3>
+        <p>Facial hair under the edge, the wrong size or shape for your face, loose or crossed straps, and a nose clip that has not been pinched to shape.</p>
+        <p>An FFP3 that gaps can protect less than an FFP2 that seals.</p>
+      </div>
+      <div class="rp-card">
+        <h3>A quick fit check</h3>
+        <p>Cup your hands over the mask and breathe out sharply. If you feel air at the edges or your eyes, adjust the nose clip and straps and try again.</p>
+        <p>Breathe in hard: a well-sealed mask pulls slightly towards your face.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="rp-section">
+    <h2 class="rp-h2">Sources and caveats</h2>
+    <p class="rp-note">Figures are compiled from secondary summaries of the standards, not the official texts. Protection factors for surgical and cloth masks are rough ranges from studies, shown dashed. Assigned factors differ by country; this page uses UK HSE for EU classes and US OSHA for US classes.</p>
+    <ul class="rp-src">
+      <li><a href="https://multimedia.3m.com/mws/media/1791500O/comparison-ffp2-kn95-n95-filtering-facepiece-respirator-classes-tb.pdf" target="_blank" rel="noopener">3M: Comparison of FFP2, KN95 and N95 respirator classes</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/European_respirator_standards" target="_blank" rel="noopener">European respirator standards (EN 149)</a></li>
+      <li><a href="https://www.ecfr.gov/current/title-42/chapter-I/subchapter-G/part-84/subpart-K/section-84.170" target="_blank" rel="noopener">US 42 CFR 84.170: NIOSH filter classes</a></li>
+      <li><a href="https://www.osha.gov/sites/default/files/2022-01/Air-purifying%20Respirators.pdf" target="_blank" rel="noopener">OSHA: Air-purifying respirators and assigned protection factors</a></li>
+      <li><a href="https://www.hse.gov.uk/pubns/books/hsg53.htm" target="_blank" rel="noopener">UK HSE HSG53: Respiratory protective equipment at work</a></li>
+      <li><a href="https://www.kiwa.com/en/service/testing-surgical-face-masks-en-14683/" target="_blank" rel="noopener">Kiwa: EN 14683 surgical mask types</a></li>
+      <li><a href="https://www.cdc.gov/niosh/npptl/FactSheets.html" target="_blank" rel="noopener">NIOSH fact sheets: surgical masks vs N95</a></li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  const FAMILIES = ['Everyday masks', 'EU (EN 149)', 'US (NIOSH)', 'International', 'Reusable & powered'];
+  const famColor = (f) => dash.colors[Math.max(0, FAMILIES.indexOf(f)) % dash.colors.length];
+
+  document.querySelectorAll('.rp-chip').forEach((b) => {
+    b.querySelectorAll('.rp-sw').forEach((s) => { s.style.background = famColor(b.dataset.family); });
+    b.addEventListener('click', () => {
+      const on = [...document.querySelectorAll('.rp-chip[aria-pressed="true"]')];
+      if (b.getAttribute('aria-pressed') === 'true' && on.length === 1) return;
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+      dash.draw('ladder');
+      dash.draw('table');
+    });
+  });
+
+  const activeFamilies = () => {
+    const chips = [...document.querySelectorAll('.rp-chip')];
+    if (!chips.length) return new Set(FAMILIES);
+    return new Set(chips.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.dataset.family));
+  };
+
+  const failLine = (el) => { const d = document.createElement('div'); d.className = 'rp-fail'; d.textContent = 'Failed to load'; el.replaceChildren(d); };
+
+  dash.draw('cell', (el) => {
+    const d = dash.data('masks');
+    if (d.status !== 'ok') { el.textContent = '—'; return; }
+    const [k, v] = (el.dataset.where || '').split('=');
+    const row = d.data.find((r) => String(r[k]) === v);
+    el.textContent = row ? String(row[el.dataset.field]) : '—';
+  });
+
+  dash.draw('ladder', (el) => {
+    const d = dash.data('masks');
+    if (d.status === 'error') { el.classList.remove('dash-skeleton'); failLine(el); return; }
+    if (d.status !== 'ok') { el.replaceChildren(); el.classList.add('dash-skeleton'); return; }
+    el.classList.remove('dash-skeleton');
+    el.replaceChildren();
+
+    const on = activeFamilies();
+    const rows = d.data
+      .map((r) => ({ ...r, lo: Number(r.pf_low), hi: Number(r.pf_high) }))
+      .filter((r) => on.has(r.family))
+      .sort((a, b) => a.hi - b.hi || a.lo - b.lo || FAMILIES.indexOf(a.family) - FAMILIES.indexOf(b.family));
+
+    const W = Math.max(280, el.clientWidth || 600);
+    const stacked = W < 560;
+    const rowH = stacked ? 46 : 32;
+    const top = 26, bottom = 6, barH = stacked ? 16 : 18;
+    const H = top + rows.length * rowH + bottom;
+
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+      .attr('aria-label', 'Protection factor by mask type');
+
+    // measure label widths as drawn
+    const probe = svg.append('g').attr('font-size', 'var(--cds-font-size-caption)');
+    let labelW = 0, endW = 0;
+    rows.forEach((r) => {
+      const t = probe.append('text').text(r.name); labelW = Math.max(labelW, t.node().getComputedTextLength());
+      const e = probe.append('text').text(r.pf_short); endW = Math.max(endW, e.node().getComputedTextLength());
+    });
+    probe.remove();
+
+    const left = stacked ? 14 : Math.min(labelW + 16, W * 0.42);
+    const right = endW + 14;
+    const x = d3.scaleLog().domain([1, 60]).range([left, W - right]).clamp(true);
+    const ticks = [1, 2, 5, 10, 20, 50];
+
+    const grid = svg.append('g');
+    ticks.forEach((t) => {
+      grid.append('line').attr('x1', x(t)).attr('x2', x(t)).attr('y1', top - 6).attr('y2', H - bottom)
+        .attr('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 1);
+      grid.append('text').attr('x', x(t)).attr('y', top - 12).attr('text-anchor', 'middle')
+        .attr('fill', 'var(--color-fg-muted)').attr('font-size', 'var(--cds-font-size-caption)').text(`${t}×`);
+    });
+
+    const tip = document.createElement('div');
+    tip.className = 'rp-tip'; tip.hidden = true; el.appendChild(tip);
+    const showTip = (r, evt) => {
+      const h = document.createElement('div'); h.className = 'rp-tip-h'; h.textContent = r.name;
+      const v = document.createElement('div'); v.className = 'rp-tip-v'; v.textContent = r.pf_label;
+      const b = document.createElement('div'); b.textContent = r.basis;
+      tip.replaceChildren(h, v, b); tip.hidden = false;
+      const box = el.getBoundingClientRect();
+      const px = evt.clientX - box.left, py = evt.clientY - box.top;
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      tip.style.left = `${Math.max(0, Math.min(px + 12, box.width - tw))}px`;
+      tip.style.top = `${Math.max(0, py - th - 10)}px`;
+    };
+
+    const g = svg.selectAll('g.rp-row').data(rows).join('g').attr('class', 'rp-row')
+      .attr('transform', (_, i) => `translate(0, ${top + i * rowH})`);
+
+    g.append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', rowH).attr('fill', 'transparent');
+
+    g.append('text')
+      .attr('x', stacked ? 4 : left - 10)
+      .attr('y', stacked ? 13 : rowH / 2)
+      .attr('dy', stacked ? 0 : '0.35em')
+      .attr('text-anchor', stacked ? 'start' : 'end')
+      .attr('fill', 'var(--color-fg)').attr('font-size', 'var(--cds-font-size-caption)')
+      .text((r) => r.name);
+
+    const by = stacked ? 20 : (rowH - barH) / 2;
+    g.each(function (r) {
+      const row = d3.select(this);
+      const c = famColor(r.family);
+      if (r.kind === 'estimate') {
+        row.append('rect').attr('x', x(1)).attr('y', by).attr('width', Math.max(2, x(r.hi) - x(1))).attr('height', barH).attr('rx', 3)
+          .attr('fill', c).attr('fill-opacity', 0.14).attr('stroke', c).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3');
+      } else {
+        row.append('rect').attr('x', x(1)).attr('y', by).attr('width', Math.max(2, x(r.lo) - x(1))).attr('height', barH).attr('rx', 3)
+          .attr('fill', c).attr('fill-opacity', r.kind === 'equivalent' ? 0.55 : 1);
+        if (r.hi > r.lo) {
+          row.append('rect').attr('x', x(r.lo)).attr('y', by).attr('width', x(r.hi) - x(r.lo)).attr('height', barH).attr('rx', 3)
+            .attr('fill', c).attr('fill-opacity', 0.35);
+        }
+      }
+      row.append('text').attr('x', x(r.hi) + 6).attr('y', by + barH / 2).attr('dy', '0.35em')
+        .attr('fill', 'var(--color-fg-muted)').attr('font-size', 'var(--cds-font-size-caption)')
+        .style('font-variant-numeric', 'tabular-nums').text(r.pf_short);
+    });
+
+    g.on('pointermove', (evt, r) => showTip(r, evt)).on('pointerleave', () => { tip.hidden = true; });
+  });
+
+  dash.draw('table', (tb) => {
+    const d = dash.data('masks');
+    tb.replaceChildren();
+    if (d.status !== 'ok') return;
+    const on = activeFamilies();
+    const cols = [...(tb.closest('table')?.querySelectorAll('th[data-field]') || [])].map((th) => th.dataset.field);
+    d.data
+      .filter((r) => on.has(r.family))
+      .sort((a, b) => Number(a.pf_high) - Number(b.pf_high) || Number(a.pf_low) - Number(b.pf_low))
+      .forEach((r) => {
+        const tr = document.createElement('tr');
+        cols.forEach((f) => {
+          const td = document.createElement('td');
+          if (f === 'pf_label') td.className = 'rp-pf';
+          td.textContent = r[f] == null ? '' : String(r[f]);
+          tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+      });
+  });
+</script>
+
+<script>
+  dash.runAll();
+  let w = window.innerWidth;
+  addEventListener('resize', () => { if (window.innerWidth !== w) { w = window.innerWidth; dash.draw('ladder'); } });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    document.querySelectorAll('.rp-chip').forEach((b) => b.querySelectorAll('.rp-sw').forEach((s) => {
+      s.style.background = dash.colors[['Everyday masks','EU (EN 149)','US (NIOSH)','International','Reusable & powered'].indexOf(b.dataset.family)];
+    }));
+    dash.draw('ladder');
+  });
+</script>
+</div>
+</body>
+</html>
