@@ -24,6 +24,8 @@
     --face-2: #d3dadc;
     --rubber: #4a565a;
     --cart: #d9679b;
+    --strap2: #3a6fb5;
+    --strap3: #c8402f;
     --font: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
     color-scheme: light;
   }
@@ -31,14 +33,14 @@
     :root:not([data-theme="light"]) {
       --bg: #0f1517; --surface: #172023; --ink: #e9efef; --ink-soft: #95a3a7; --line: #273235;
       --accent: #3cc2b5; --accent-soft: #163b38; --particle: #66757a; --filter: #f0a83c; --edge: #ff6b5c;
-      --face: #263235; --face-2: #1f292c; --rubber: #8a9ba0; --cart: #e58bb5;
+      --face: #263235; --face-2: #1f292c; --rubber: #8a9ba0; --cart: #e58bb5; --strap2: #6f9be0; --strap3: #f06a55;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0f1517; --surface: #172023; --ink: #e9efef; --ink-soft: #95a3a7; --line: #273235;
     --accent: #3cc2b5; --accent-soft: #163b38; --particle: #66757a; --filter: #f0a83c; --edge: #ff6b5c;
-    --face: #263235; --face-2: #1f292c; --rubber: #8a9ba0; --cart: #e58bb5;
+    --face: #263235; --face-2: #1f292c; --rubber: #8a9ba0; --cart: #e58bb5; --strap2: #6f9be0; --strap3: #f06a55;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -202,7 +204,7 @@
   for (let i = 0; i < 100; i++) waffle.appendChild(document.createElement('i'));
   const cells = [...waffle.children];
 
-  let eyebrow = 'Best match', current = null;
+  let eyebrow = 'Best match', current = null, hint = '';
   const setFill = (el) => el.style.setProperty('--fill', `${(el.value - el.min) / (el.max - el.min) * 100}%`);
 
   function update(first) {
@@ -214,26 +216,17 @@
     setFill(prot); setFill(budget);
 
     const fits = MASKS.filter((m) => m.pf >= p.min && m.price <= b).sort((x, y) => x.pf - y.pf || x.price - y.price);
-    const alts = $('alts');
-    alts.replaceChildren();
-    let best, others;
+    let best;
     if (fits.length) {
-      best = fits[0]; others = fits.slice(1, 3);
-      eyebrow = 'Best match';
+      best = fits[0];
+      eyebrow = 'Best match'; hint = '';
     } else {
       const strong = MASKS.filter((m) => m.pf >= p.min).sort((x, y) => x.price - y.price)[0];
       const cheap = MASKS.filter((m) => m.price <= b).sort((x, y) => y.pf - x.pf || x.price - y.price)[0];
-      best = cheap || strong; others = [strong].filter((m) => m && m !== best);
+      best = cheap || strong;
       eyebrow = 'Nothing fits both. Closest within budget';
+      hint = strong && strong !== best ? ` For ${p.label.split(' · ').pop()} you'd need a ${strong.name.toLowerCase()}, about ${money(strong.price)}.` : '';
     }
-    [NONE, best, ...others].forEach((m, i) => {
-      const btn = document.createElement('button');
-      btn.type = 'button'; btn.className = 'alt';
-      btn.textContent = i <= 1 ? m.name : `${m.name} · ${m.pfLabel} · ${money(m.price)}`;
-      btn.addEventListener('click', () => show(m));
-      btn.dataset.id = m.id;
-      alts.appendChild(btn);
-    });
     current = best;
     show(first ? NONE : best);
   }
@@ -245,7 +238,7 @@
     $('tech').textContent = m.tech;
     $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : '');
     $('price').textContent = money(m.price);
-    $('note').textContent = m.note;
+    $('note').textContent = m.note + (m === current ? hint : '');
     $('through').textContent = `${s.total} in 100 get in`;
     $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge; $('n-straight').textContent = s.straight;
     $('leg-straight').hidden = !s.straight;
@@ -265,7 +258,7 @@
     const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
     let C = {}, mask = null, parts = [], scale = 1, ox = 0, oy = 0, last = 0, clock = 0, spawnAcc = 0;
     const readColors = () => {
-      C = {}; ['face', 'face-2', 'accent', 'accent-soft', 'particle', 'filter', 'edge', 'surface', 'line', 'rubber', 'ink-soft', 'cart']
+      C = {}; ['face', 'face-2', 'accent', 'accent-soft', 'particle', 'filter', 'edge', 'surface', 'line', 'rubber', 'ink-soft', 'cart', 'strap2', 'strap3']
         .forEach((k) => { C[k] = css('--' + k); });
     };
 
@@ -277,6 +270,7 @@
     };
     const S = {
       flat: P('M142 150 C170 141 230 141 258 150 L262 222 C236 236 164 236 138 222 Z'),
+      flat3: P('M200 132 C176 132 154 140 144 152 C140 176 142 200 150 220 C164 240 184 248 200 248 C216 248 236 240 250 220 C258 200 260 176 256 152 C246 140 224 132 200 132 Z'),
       cup: P('M200 127 C175 127 150 146 144 176 C139 207 166 245 200 249 C234 245 261 207 256 176 C250 146 225 127 200 127 Z'),
       half: P('M200 124 C186 124 172 148 160 176 C151 198 159 222 176 233 C187 239 213 239 224 233 C241 222 249 198 240 176 C228 148 214 124 200 124 Z'),
       full: P('M200 34 C150 34 126 70 126 118 C126 160 132 200 150 230 C164 252 182 262 200 262 C218 262 236 252 250 230 C268 200 274 160 274 118 C274 70 250 34 200 34 Z'),
@@ -374,21 +368,28 @@
           line([166, 147, 200, 142, 234, 147], 3, C['ink-soft'], .6, true);
         }
         ctx.strokeStyle = s === 'cloth' ? C['particle'] : C['accent']; ctx.lineWidth = 1.6; ctx.setLineDash([5, 4]); ctx.stroke(S.flat); ctx.setLineDash([]);
-      } else if (s === 'ffp' || s === 'ffp3') {
-        // moulded cup (3M Aura / 8210 style): two head straps, nose clip, centre seam, sealed edge
-        both(() => { line([148, 160, 134, 132, 124, 114], 2.2, C['accent'], .8, true); line([152, 216, 138, 224, 128, 214], 2.2, C['accent'], .8, true); });
+      } else if (s === 'ffp') {
+        // FFP2 / N95: white moulded cup (3M 8810 / Aura style), blue head straps, nose clip, centre seam, sealed edge, no valve
+        both(() => { line([148, 160, 134, 132, 124, 114], 2.4, C['strap2'], .9, true); line([152, 216, 138, 224, 128, 214], 2.4, C['strap2'], .9, true); });
         const g = ctx.createRadialGradient(194, 176, 8, 200, 190, 70);
         g.addColorStop(0, C['surface']); g.addColorStop(1, C['face-2']);
         ctx.fillStyle = g; ctx.fill(S.cup);
         ctx.strokeStyle = C['accent']; ctx.lineWidth = 3; ctx.stroke(S.cup);
         line([200, 134, 204, 190, 200, 244], 1, C['ink-soft'], .35, true);
-        line([150, 182, 200, 192, 250, 182], 1, C['ink-soft'], .25, true);
         line([180, 135, 200, 129, 220, 135], 3.5, C['ink-soft'], .75, true);
-        if (s === 'ffp3') {
-          ctx.fillStyle = C['accent']; ctx.beginPath(); ctx.arc(200, 208, 15, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = C['surface']; ctx.lineWidth = 1.3;
-          for (let k = -7; k <= 7; k += 3.5) { ctx.beginPath(); ctx.moveTo(192, 208 + k); ctx.lineTo(208, 208 + k); ctx.stroke(); }
-        }
+      } else if (s === 'ffp3') {
+        // FFP3: three-panel fold-flat respirator (3M Aura 9332 style), red head straps, wide nose foam, big front valve
+        both(() => { line([146, 150, 132, 124, 124, 108], 3, C['strap3'], .95, true); line([148, 214, 136, 226, 128, 218], 3, C['strap3'], .95, true); });
+        ctx.fillStyle = C['surface']; ctx.fill(S.flat3);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 3; ctx.stroke(S.flat3);
+        ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.moveTo(150, 166); ctx.quadraticCurveTo(200, 180, 250, 166); ctx.lineTo(252, 168); ctx.quadraticCurveTo(200, 184, 148, 168); ctx.fill();
+        line([148, 167, 200, 182, 252, 167], 1.4, C['ink-soft'], .45, true);
+        line([150, 214, 200, 226, 250, 214], 1.4, C['ink-soft'], .45, true);
+        ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.roundRect(168, 136, 64, 8, 4); ctx.fill();
+        // exhalation valve
+        ctx.fillStyle = C['rubber']; ctx.beginPath(); ctx.roundRect(182, 188, 36, 30, 9); ctx.fill();
+        ctx.strokeStyle = C['face-2']; ctx.lineWidth = 1.6;
+        for (let y = 194; y <= 212; y += 4.5) { ctx.beginPath(); ctx.moveTo(188, y); ctx.lineTo(212, y); ctx.stroke(); }
       } else if (s === 'half' || s === 'papr') {
         // reusable half mask (3M 6000 / 7500, JSP Force 8): crown cradle, nose cone, centre valve, two side cartridges
         ctx.beginPath(); ctx.moveTo(150, 46); ctx.quadraticCurveTo(200, 18, 250, 46); ctx.lineWidth = 8; ctx.strokeStyle = C['rubber']; ctx.globalAlpha = .8; ctx.stroke(); ctx.globalAlpha = 1;
@@ -509,6 +510,13 @@
 
   prot.addEventListener('input', () => update());
   budget.addEventListener('input', () => update());
+  // quick compare buttons in the answer card: the same four every time
+  ['none', 'ffp2', 'ffp3', 'full'].map((id) => [NONE, ...MASKS].find((m) => m.id === id)).forEach((m) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'alt'; b.dataset.id = m.id; b.textContent = m.name;
+    b.addEventListener('click', () => show(m));
+    $('alts').appendChild(b);
+  });
   [NONE, ...MASKS].forEach((m) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'chip'; b.dataset.id = m.id; b.textContent = m.name;
