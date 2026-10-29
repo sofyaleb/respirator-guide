@@ -236,8 +236,8 @@
 
   prot.addEventListener('input', () => update());
   budget.addEventListener('input', () => update());
-  // quick compare buttons in the answer card: the same four every time
-  ['none', 'ffp2', 'ffp3', 'full'].map((id) => [NONE, ...MASKS].find((m) => m.id === id)).forEach((m) => {
+  // quick compare buttons in the answer card: the same five every time
+  ['none', 'ffp2', 'ffp3', 'half', 'full'].map((id) => [NONE, ...MASKS].find((m) => m.id === id)).forEach((m) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'alt'; b.dataset.id = m.id; b.textContent = m.name;
     b.addEventListener('click', () => show(m));
