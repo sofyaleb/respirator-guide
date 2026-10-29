@@ -84,6 +84,17 @@
   .tech { margin: 0 0 .35rem; font-size: .85rem; color: var(--ink-soft); line-height: 1.4; }
   .src { margin: .15rem 0 0; font-size: .8rem; color: var(--ink-soft); }
   .src a { color: var(--ink); }
+  .products { display: grid; gap: .5rem; margin-top: .5rem; }
+  .products h3 { margin: 0; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; }
+  .products ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .1rem; }
+  .products li { display: grid; gap: .1rem; padding: .55rem 0; border-top: 1px solid var(--line); }
+  .products li:first-child { border-top: 0; }
+  .pr-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .pr-top b { font-weight: 600; }
+  .pr-top a { flex: none; font-size: .85rem; color: var(--accent); text-decoration: none; font-weight: 500; }
+  .pr-top a:hover, .pr-top a:focus-visible { text-decoration: underline; }
+  .products li > span { font-size: .8rem; color: var(--ink-soft); }
+  .products p { margin: 0; font-size: .75rem; color: var(--ink-soft); }
   .facts { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .facts b { color: var(--ink); font-weight: 600; }
   .note { color: var(--ink-soft); font-size: .9rem; margin: .25rem 0 0; }
@@ -148,6 +159,7 @@
         </div>
         <p class="note" id="note"></p>
         <p class="src" id="src" hidden>Source: <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz, “Stop using ear-loop FFP2 respirators”, Gloze Matrix (2026)</a>, citing a 2023 review in the Journal of Hospital Infection, and readers’ comments on it.</p>
+        <div class="products" id="products" hidden><h3>Models to look for</h3><ul></ul><p>Links go to the maker’s or a retailer’s page. We don’t sell anything or earn from these links. Check for a NIOSH approval number or CE mark before you buy.</p></div>
         <div class="alts" id="alts"></div>
       </section>
 
@@ -172,7 +184,7 @@
 <script src="shared.js"></script>
 <script>
 (() => {
-  const { MASKS, NONE, money, split } = window.RG;
+  const { MASKS, NONE, money, split, renderProducts } = window.RG;
   const PROT = [
     { min: 1, label: 'Just a cover' }, { min: 2, label: 'A little · 2×' }, { min: 4, label: 'Some · 4×' },
     { min: 10, label: 'Good · 10×' }, { min: 20, label: 'High · 20×' }, { min: 50, label: 'Very high · 50×' },
@@ -221,6 +233,7 @@
     $('price').textContent = money(m.price);
     $('note').textContent = m.note + (m === current ? hint : '');
     $('src').hidden = !(m.id === 'ffp2' || m.id === 'ffp2ear');
+    renderProducts($('products'), m.id);
     $('through').textContent = `${s.total} in 100 get in`;
     $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge; $('n-straight').textContent = s.straight;
     $('leg-straight').hidden = !s.straight;

@@ -291,5 +291,42 @@ window.RG = (() => {
     };
   }
 
-  return { MASKS, NONE, money, split, createScene };
+
+  // Specific models to look for, by mask type. `where` says whose page the link goes to.
+  const PRODUCTS = {
+    ffp2: [
+      { name: '3M Aura 9205+', tag: 'N95 · three-panel fold-flat · head straps · no valve', url: 'https://www.3m.com/3M/en_US/p/d/b00051022/', where: '3M' },
+      { name: '3M 8210', tag: 'N95 · moulded cup · head straps · no valve', url: 'https://www.3m.com/3M/en_US/p/dc/v000585997/', where: '3M' },
+      { name: 'Honeywell DF300', tag: 'N95 · flat-fold · head straps', url: 'https://gemplers.com/products/honeywell-df300-flat-fold-n95-respirators', where: 'Gempler’s (retailer)' },
+      { name: 'Kimberly-Clark Kimtech 53358', tag: 'N95 · pouch style · two headbands', url: 'https://www.kcprofessional.com/en-us/products/scientific-and-research/lab-environment/disposable-masks/kimtech-n95-pouch-respirator', where: 'Kimberly-Clark Professional' },
+      { name: 'Powecom KN95, headband style', tag: 'KN95 · also sold with ear loops, so pick the headband version', url: 'https://bonafidemasks.com/kn95-respirator-mask-headband-style-fda-authorized/', where: 'Bona Fide Masks (US distributor)' },
+    ],
+    ffp2ear: [
+      { name: '3M 9501+', tag: 'KN95 / P2 · knitted ear loops · sold mainly in Asia-Pacific', url: 'https://www.3m.com.sg/3M/en_SG/p/d/v101172567/', where: '3M Singapore' },
+    ],
+    half: [
+      { name: '3M 6000 series (6200)', tag: 'Elastomeric half mask · takes 3M P100 or gas filters', url: 'https://www.3m.com/3M/en_US/p/dc/v101806317/', where: '3M' },
+      { name: 'Dentec Comfort-Air Series 400', tag: 'Elastomeric half mask · Diskit P100 filters', url: 'https://www.fishersci.com/shop/products/diskit-p100-elastomeric-respirator-2/19222466', where: 'Fisher Scientific (retailer)' },
+      { name: 'GVS Elipse P100', tag: 'Low-profile half mask · P100 filters', url: 'https://www.rockler.com/gvs-elipse-p100-half-mask-respirators', where: 'Rockler (retailer)' },
+      { name: 'MSA Advantage 900', tag: 'Elastomeric half mask · no exhalation valve, so it filters your breath too · speaking diaphragm', url: 'https://us.msasafety.com/p/000100000200001190?locale=en', where: 'MSA' },
+      { name: 'EnvoPro (Envomask)', tag: 'Reusable half mask · N95 or N99 filters', url: 'https://envomask.com/', where: 'Envomask' },
+    ],
+  };
+  function renderProducts(el, id) {
+    const items = PRODUCTS[id] || [];
+    el.hidden = !items.length;
+    const list = el.querySelector('ul');
+    list.replaceChildren(...items.map((p) => {
+      const li = document.createElement('li');
+      const top = document.createElement('div'); top.className = 'pr-top';
+      const name = document.createElement('b'); name.textContent = p.name;
+      const a = document.createElement('a'); a.href = p.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Where to buy ↗';
+      a.title = 'Opens ' + p.where;
+      top.append(name, a);
+      const tag = document.createElement('span'); tag.textContent = `${p.tag} · link: ${p.where}`;
+      li.append(top, tag); return li;
+    }));
+  }
+
+  return { MASKS, NONE, money, split, createScene, PRODUCTS, renderProducts };
 })();
