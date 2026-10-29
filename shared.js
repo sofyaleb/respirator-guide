@@ -1,4 +1,4 @@
-// Shared by the picker and the mask gallery: the mask data and the animated face drawing.
+// The mask data and the animated face drawing used by the picker.
 window.RG = (() => {
   // pf: protection factor. filter: share of particles that pass through the filter material itself
   // (from each standard's filter limit; illustrative for cloth and surgical). The rest of 1/pf leaks round the edges.
