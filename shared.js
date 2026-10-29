@@ -86,14 +86,19 @@ window.RG = (() => {
     };
     function assign(q) {
       const b = bar(), s = mask ? mask.style : 'none';
-      if (s === 'none') { q.fate = 'straight'; [q.tx, q.ty] = [INHALE.x + (Math.random() - .5) * 20, INHALE.y + (Math.random() - .5) * 24]; return; }
+      if (s === 'none') {
+        // no mask: aim at the nose or the mouth, spread out so they don't pile up on one point, and drift in slowly
+        q.fate = 'straight';
+        [q.tx, q.ty] = Math.random() < .45 ? [200 + (Math.random() - .5) * 18, 160 + (Math.random() - .5) * 8] : [200 + (Math.random() - .5) * 34, 200 + (Math.random() - .5) * 8];
+        q.dur = 4 + Math.random() * 2.5; return;
+      }
       const total = 1 / mask.pf, f = Math.min(total, mask.filter), u = Math.random(), carts = CARTRIDGES[s];
       if (u < f) { q.fate = 'filter'; [q.tx, q.ty] = carts ? carts[Math.floor(Math.random() * carts.length)].map((v) => v + (Math.random() - .5) * 14) : surfacePoint(b); }
       else if (u < total && b.gaps.length) { q.fate = 'edge'; [q.tx, q.ty] = b.gaps[Math.floor(Math.random() * b.gaps.length)]; }
       else { q.fate = 'stop'; [q.tx, q.ty] = carts && Math.random() < .6 ? carts[Math.floor(Math.random() * carts.length)].map((v) => v + (Math.random() - .5) * 30) : surfacePoint(b); }
     }
     function spawn(progress) {
-      const q = { sx: Math.random() * 400, sy: 20 + Math.random() * 270, t: progress || 0, dur: 2.2 + Math.random() * 1.6,
+      const q = { sx: Math.random() * 400, sy: 20 + Math.random() * 270, t: progress || 0, dur: 2.6 + Math.random() * 1.8,
         r: Math.random() < .18 ? 2.6 + Math.random() * 1.2 : 1.2 + Math.random() * 1.1, s: 'fly', a: 1, bend: (Math.random() - .5) * 60 };
       assign(q); q.x = q.sx; q.y = q.sy; parts.push(q);
     }
@@ -246,6 +251,7 @@ window.RG = (() => {
             q.s = q.fate === 'stop' ? 'stuck' : q.fate === 'filter' ? 'through' : 'leak'; q.ring = 0; q.trail = [];
             // red ones sit at the gap for a moment before slipping in; grey ones stay stuck to the mask for a while
             q.hold = q.s === 'leak' && q.fate === 'edge' ? 1.4 + Math.random() * .8 : q.s === 'stuck' ? 2.2 + Math.random() * 1.2 : 0;
+            if (q.fate === 'straight') q.ring = 1;
           }
         } else if (q.s === 'stuck') { if (q.hold > 0) q.hold -= dt; else q.a -= dt * .5; }
         else if (q.hold > 0) {
@@ -253,6 +259,7 @@ window.RG = (() => {
           q.hold -= dt; q.ring = (q.ring + dt * 1.2) % 1;
           q.x = q.tx + Math.sin(clock * 9 + q.sx) * 1.2; q.y = q.ty + Math.cos(clock * 7 + q.sy) * 1.2;
         }
+        else if (q.fate === 'straight') { q.a -= dt * .9; }
         else if (q.fate === 'edge') {
           // after lingering, it slips in under the edge: shrink and fade right at the gap, never crossing the mask
           q.a -= dt * 1.4; q.r = Math.max(.4, q.r - dt * 1.2); q.ring = Math.min(1, q.ring + dt * 1.6);
@@ -278,7 +285,7 @@ window.RG = (() => {
       for (const q of parts) {
         const a = Math.max(0, Math.min(1, q.a));
         if (q.s === 'fly') {
-          const e = q.t; ctx.globalAlpha = .45 + .55 * e; ctx.fillStyle = C['particle'];
+          const e = q.t; ctx.globalAlpha = .45 + .55 * e; ctx.fillStyle = q.fate === 'straight' && e > .75 ? C['edge'] : C['particle'];
           ctx.beginPath(); ctx.arc(q.x, q.y, q.r * (.5 + .5 * e), 0, Math.PI * 2); ctx.fill(); continue;
         }
         const col = q.s === 'stuck' ? C['particle'] : q.s === 'through' ? C['filter'] : C['edge'];
