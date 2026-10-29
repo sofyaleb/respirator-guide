@@ -178,6 +178,7 @@
     { id: 'ffp2', name: 'FFP2 / N95 / KN95', pf: 10, pfLabel: '10×', filter: .06, price: 1, style: 'ffp', note: 'The everyday respirator for smoke, crowded places and viral illness. Pinch the nose clip for a good seal.' },
     { id: 'ffp3', name: 'FFP3', pf: 20, pfLabel: '20×', filter: .01, price: 4, style: 'ffp3', note: 'The highest disposable class, used in high-risk healthcare. Often has a valve to make breathing out easier.' },
     { id: 'half', name: 'Reusable half mask', pf: 20, pfLabel: '10–20×', filter: .0005, price: 40, style: 'half', note: 'Rubber face piece with P3 or P100 filters you replace. Cheap per day if you wear one a lot.' },
+    { id: 'full', name: 'Full-face mask', pf: 40, pfLabel: '40–50×', filter: .0005, price: 200, style: 'full', note: 'Rubber mask with a clear visor and replaceable P3 or P100 filters. Covers your eyes too.' },
     { id: 'hood', name: 'Powered hood (PAPR)', pf: 25, pfLabel: '25×', filter: .0005, price: 600, style: 'hood', note: 'A belt fan pushes filtered air into a loose hood. No seal needed, so it works with a beard.' },
     { id: 'papr', name: 'Powered half mask', pf: 50, pfLabel: '50×', filter: .0005, price: 900, style: 'papr', note: 'A fan-driven tight half mask. Workplace equipment for heavy exposure.' },
   ];
@@ -271,14 +272,18 @@
     const hair = P('M300 34 C258 34 236 58 232 88 C252 70 286 64 318 76 C334 90 348 108 362 130 C366 70 344 34 300 34 Z');
     const ear = P('M314 128 C326 124 334 134 333 148 C332 162 324 170 314 166 C308 152 308 140 314 128 Z');
     const shapes = {
-      cup: P('M228 124 C215 136 204 148 198 157 C206 166 212 172 212 184 C212 206 222 228 252 234 C272 232 290 220 302 205 C300 182 298 158 292 136 C272 128 248 122 228 124 Z'),
+      cup: P('M224 124 C202 132 184 152 180 178 C177 204 194 230 234 240 C262 243 288 230 304 210 C302 184 299 158 293 135 C272 126 246 120 224 124 Z'),
+      seal: P('M224 124 C246 120 272 126 293 135 C299 158 302 184 304 210 C288 230 262 243 234 240'),
+      fold: P('M181 182 C214 176 258 176 303 184'),
       flat: P('M224 136 L203 160 L212 172 L211 205 C214 220 228 229 250 229 L300 205 L298 146 Z'),
+      full: P('M236 54 C210 60 194 84 190 116 C186 150 186 190 190 214 C196 240 214 254 242 254 C270 252 292 238 306 220 C310 180 310 120 302 70 C284 56 260 50 236 54 Z'),
+      lens: P('M232 66 C212 72 200 92 198 118 C196 150 198 178 204 196 C224 200 250 196 268 188 C272 150 272 110 266 72 C256 64 244 62 232 66 Z'),
       half: P('M230 118 C214 132 200 146 192 156 C200 166 206 174 206 188 C206 214 220 236 254 240 C276 238 296 226 308 210 C306 184 302 156 296 132 C276 122 252 116 230 118 Z'),
       hood: P('M300 14 C236 14 202 58 196 108 L184 124 L184 252 C190 272 200 288 212 300 L386 300 C378 252 394 200 390 128 C386 58 354 14 300 14 Z'),
       visor: P('M196 112 L186 126 L186 246 C210 250 236 246 250 238 L250 108 C232 102 212 104 196 112 Z'),
     };
     const GAP_TOP = { x: 214, y: 142 }, GAP_LOW = { x: 238, y: 233 }, INHALE = { x: 214, y: 170 };
-    const frontX = () => !mask || mask.style === 'none' ? 212 : mask.style === 'hood' ? 182 : mask.style === 'half' || mask.style === 'papr' ? 194 : 200;
+    const frontX = () => !mask || mask.style === 'none' ? 212 : mask.style === 'hood' ? 182 : mask.style === 'half' || mask.style === 'papr' ? 194 : mask.style === 'ffp' || mask.style === 'ffp3' ? 184 : mask.style === 'full' ? 192 : 200;
 
     function resize() {
       const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -296,7 +301,7 @@
       if (mask.style === 'none') { q.s = 'edge2'; return; }
       const total = 1 / mask.pf, f = Math.min(total, mask.filter), u = Math.random();
       if (u < f) { q.s = 'filter'; }
-      else if (u < total) { q.s = 'edge'; q.wp = mask.style === 'hood' ? { x: 200, y: 292 } : q.y < 188 ? GAP_TOP : GAP_LOW; }
+      else if (u < total) { q.s = 'edge'; q.wp = mask.style === 'hood' ? { x: 200, y: 292 } : mask.style === 'full' ? (q.y < 160 ? { x: 236, y: 56 } : { x: 244, y: 252 }) : q.y < 188 ? GAP_TOP : GAP_LOW; }
       else { q.s = 'stop'; q.x = frontX() - 2 - Math.random() * 5; }
     }
 
@@ -323,20 +328,57 @@
         ctx.beginPath(); ctx.moveTo(298, 150); ctx.quadraticCurveTo(318, 132, 322, 146); ctx.moveTo(300, 202); ctx.quadraticCurveTo(326, 190, 324, 160);
         ctx.strokeStyle = C['ink-soft']; ctx.globalAlpha = .5; ctx.stroke(); ctx.globalAlpha = 1;
       } else if (s === 'ffp' || s === 'ffp3') {
-        strap(292, 142, 356, 112); strap(300, 204, 360, 214);
-        ctx.fillStyle = C['surface']; ctx.fill(shapes.cup);
-        ctx.strokeStyle = C['accent']; ctx.lineWidth = 2; ctx.stroke(shapes.cup);
-        ctx.globalAlpha = .25; ctx.beginPath(); ctx.moveTo(206, 166); ctx.bezierCurveTo(240, 172, 270, 168, 300, 160); ctx.stroke(); ctx.globalAlpha = 1;
-        ctx.beginPath(); ctx.moveTo(212, 138); ctx.lineTo(232, 126); ctx.lineWidth = 3.5; ctx.strokeStyle = C['ink-soft']; ctx.stroke();
-        if (s === 'ffp3') { ctx.fillStyle = C['accent']; ctx.beginPath(); ctx.arc(232, 204, 11, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = C['surface']; ctx.beginPath(); ctx.arc(232, 204, 5, 0, Math.PI * 2); ctx.fill(); }
-      } else if (s === 'half' || s === 'papr') {
-        strap(296, 140, 352, 104, 3); strap(304, 206, 362, 222, 3);
-        ctx.fillStyle = C['rubber']; ctx.fill(shapes.half);
-        ctx.fillStyle = C['accent']; ctx.beginPath(); ctx.ellipse(250, 216, 22, 18, -.3, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = C['surface']; ctx.globalAlpha = .5; ctx.lineWidth = 1;
-        for (let k = -12; k <= 12; k += 6) { ctx.beginPath(); ctx.moveTo(250 + k, 202); ctx.lineTo(250 + k, 230); ctx.stroke(); }
+        // Moulded cup respirator: domed shell standing off the face, sealed edge, nose wire, two head straps.
+        const top = (a, b, c, d) => { ctx.beginPath(); ctx.moveTo(a, b); ctx.quadraticCurveTo(c, d, a + 70, b - 70); ctx.lineWidth = 2.2; ctx.strokeStyle = C['accent']; ctx.globalAlpha = .7; ctx.stroke(); ctx.globalAlpha = 1; };
+        top(292, 140, 318, 96);
+        ctx.beginPath(); ctx.moveTo(302, 206); ctx.quadraticCurveTo(330, 226, 362, 232); ctx.lineWidth = 2.2; ctx.strokeStyle = C['accent']; ctx.globalAlpha = .7; ctx.stroke(); ctx.globalAlpha = 1;
+        const g = ctx.createLinearGradient(180, 0, 304, 0);
+        g.addColorStop(0, C['surface']); g.addColorStop(1, C['face-2']);
+        ctx.fillStyle = g; ctx.fill(shapes.cup);
+        ctx.strokeStyle = C['ink-soft']; ctx.globalAlpha = .45; ctx.lineWidth = 1.2; ctx.stroke(shapes.cup); ctx.globalAlpha = 1;
+        // the seal where the mask meets the face
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 3.5; ctx.stroke(shapes.seal);
+        // moulded fold and a few ribs on the shell
+        ctx.strokeStyle = C['ink-soft']; ctx.globalAlpha = .3; ctx.lineWidth = 1; ctx.stroke(shapes.fold);
+        [[190, 160, 214, 140], [186, 204, 218, 228], [200, 150, 236, 134]].forEach(([a, b, c, d]) => { ctx.beginPath(); ctx.moveTo(a, b); ctx.quadraticCurveTo((a + c) / 2 + 4, (b + d) / 2, c, d); ctx.stroke(); });
         ctx.globalAlpha = 1;
-        if (s === 'papr') { ctx.beginPath(); ctx.moveTo(262, 232); ctx.bezierCurveTo(272, 276, 320, 268, 336, 300); ctx.lineWidth = 8; ctx.strokeStyle = C['rubber']; ctx.stroke(); }
+        // nose wire
+        ctx.beginPath(); ctx.moveTo(200, 140); ctx.quadraticCurveTo(212, 128, 228, 124); ctx.lineWidth = 3.5; ctx.strokeStyle = C['ink-soft']; ctx.stroke();
+        if (s === 'ffp3') {
+          ctx.fillStyle = C['accent']; ctx.beginPath(); ctx.arc(196, 198, 13, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = C['surface']; ctx.lineWidth = 1.2;
+          for (let k = -6; k <= 6; k += 4) { ctx.beginPath(); ctx.moveTo(190, 198 + k); ctx.lineTo(202, 198 + k); ctx.stroke(); }
+        }
+      } else if (s === 'half' || s === 'papr') {
+        // Elastomeric half mask: rubber face piece, filter cartridge on the cheek, exhalation valve at the chin, harness.
+        strap(296, 138, 350, 98, 3.5); strap(304, 208, 360, 228, 3.5);
+        ctx.fillStyle = C['rubber']; ctx.fill(shapes.half);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(230, 118); ctx.bezierCurveTo(254, 116, 278, 122, 296, 132); ctx.bezierCurveTo(302, 156, 306, 184, 308, 210); ctx.stroke();
+        // exhalation valve
+        ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.roundRect(198, 196, 18, 24, 6); ctx.fill();
+        ctx.strokeStyle = C['rubber']; ctx.lineWidth = 1; for (let y = 201; y <= 215; y += 4) { ctx.beginPath(); ctx.moveTo(201, y); ctx.lineTo(213, y); ctx.stroke(); }
+        if (s === 'half') {
+          // cylindrical cartridge seen side-on
+          ctx.fillStyle = C['accent']; ctx.beginPath(); ctx.ellipse(250, 206, 26, 26, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = C['surface']; ctx.globalAlpha = .55; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(250, 206, 18, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(250, 206, 9, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.ellipse(250, 210, 14, 12, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(254, 220); ctx.bezierCurveTo(272, 276, 320, 268, 336, 300); ctx.lineWidth = 9; ctx.strokeStyle = C['rubber']; ctx.stroke();
+          ctx.lineWidth = 1; ctx.strokeStyle = C['face-2']; ctx.globalAlpha = .6;
+          for (let k = 0; k < 1; k += .08) { const x = 254 + (336 - 254) * k, y = 220 + 80 * k; ctx.beginPath(); ctx.arc(x + (k < .5 ? 10 * k : 0), y, 4.5, 0, Math.PI * 2); ctx.stroke(); }
+          ctx.globalAlpha = 1;
+        }
+      } else if (s === 'full') {
+        // Full-face mask: rubber surround from forehead to chin, wide clear visor, chin filter, four-point harness.
+        strap(300, 70, 350, 58, 3.5); strap(304, 112, 362, 120, 3.5); strap(306, 196, 362, 206, 3.5); strap(300, 226, 356, 252, 3.5);
+        ctx.fillStyle = C['rubber']; ctx.fill(shapes.full);
+        ctx.fillStyle = C['surface']; ctx.globalAlpha = .38; ctx.fill(shapes.lens); ctx.globalAlpha = 1;
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 2; ctx.stroke(shapes.lens);
+        ctx.strokeStyle = C['surface']; ctx.globalAlpha = .5; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(212, 84); ctx.quadraticCurveTo(204, 110, 206, 140); ctx.stroke(); ctx.globalAlpha = 1;
+        ctx.fillStyle = C['accent']; ctx.beginPath(); ctx.ellipse(204, 224, 18, 18, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = C['surface']; ctx.globalAlpha = .55; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(204, 224, 11, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
       } else if (s === 'hood') {
         ctx.fillStyle = C['accent-soft']; ctx.globalAlpha = .55; ctx.fill(shapes.hood); ctx.globalAlpha = 1;
         ctx.strokeStyle = C['accent']; ctx.lineWidth = 2; ctx.stroke(shapes.hood);
@@ -425,7 +467,7 @@
 
   prot.addEventListener('input', () => update());
   budget.addEventListener('input', () => update());
-  const SHORT = { none: 'No mask', cloth: 'Cloth', surgical: 'Surgical', ffp1: 'FFP1', ffp2: 'FFP2 / N95', ffp3: 'FFP3', half: 'Half mask', hood: 'Powered hood', papr: 'Powered half mask' };
+  const SHORT = { none: 'No mask', cloth: 'Cloth', surgical: 'Surgical', ffp1: 'FFP1', ffp2: 'FFP2 / N95', ffp3: 'FFP3', half: 'Half mask', full: 'Full-face', hood: 'Powered hood', papr: 'Powered half mask' };
   [NONE, ...MASKS].forEach((m) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'chip'; b.dataset.id = m.id; b.textContent = SHORT[m.id] || m.name;
