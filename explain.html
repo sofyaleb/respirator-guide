@@ -73,7 +73,8 @@
   .grid100 i.in { background: var(--edge); }
   .grid100 i.f { background: var(--filter); }
   .bars { display: grid; gap: .45rem; }
-  .bar { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) 2.6rem; gap: .6rem; align-items: center; font-size: .85rem; font-variant-numeric: tabular-nums; }
+  .bar span:first-child { min-width: 0; }
+  .bar { display: grid; grid-template-columns: minmax(6.5rem, 11rem) minmax(0, 1fr) 2.6rem; gap: .6rem; align-items: center; font-size: .85rem; font-variant-numeric: tabular-nums; }
   .bar .t { height: 12px; border-radius: 6px; background: var(--dot); overflow: hidden; display: flex; }
   .bar .t span { height: 100%; transition: width .5s cubic-bezier(.2,.7,.2,1); }
   .bar .t .e { background: var(--edge); } .bar .t .f { background: var(--filter); }
@@ -138,7 +139,7 @@
         <h2>Most of what gets in comes round the edges</h2>
         <p>Air reaches you two ways: through the filter, or through gaps where the mask meets your face. Breathing pulls air along whichever path is easiest.</p>
         <p>An FFP2 filter lets through at most 6% and an FFP3 at most 1%, but both are rated at roughly 10× to 20× overall, because a few percent always leaks at the nose, cheeks and chin. Past a certain point a better filter barely helps. A better seal does.</p>
-        <p class="soft">The split shown is illustrative, based on each standard's filter limit.</p>
+        <p class="soft">The split shown is illustrative, based on each standard's filter limit; cloth, face mask and ear-loop figures are rough estimates.</p>
       </section>
 
       <section class="ch" data-step="3">
@@ -185,7 +186,7 @@
       <div class="state" data-state="2" hidden>
         <span class="fig-title">Where the particles get in, out of 100</span>
         <div class="bars" id="b2"></div>
-        <div class="legend"><span><i style="background:var(--filter)"></i>Through the filter</span><span><i style="background:var(--edge)"></i>Round the edges</span></div>
+        <div class="legend"><span><i style="background:var(--filter)"></i>Through the filter</span><span><i style="background:var(--edge)"></i>Round the edges (or straight in, with no mask)</span></div>
       </div>
 
       <div class="state" data-state="3" hidden>
@@ -225,6 +226,7 @@
   <p class="foot">Protection factors here are UK HSE and US OSHA assigned ratings, and fit-test pass levels follow HSE and OSHA guidance for half masks and disposable respirators. The fit-test counts and the filter/edge split are illustrative examples. <a href="./">Try the mask picker</a> · <a href="details.html">Full comparison and sources</a>.</p>
 </div>
 
+<script src="shared.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -253,9 +255,11 @@
   [['No mask', 1], ['2×', 2], ['4×', 4], ['10×', 10], ['20×', 20], ['50×', 50]]
     .forEach(([l, pf]) => $('b1').appendChild(bar(l, [['e', Math.round(100 / pf)]])));
 
-  // 3 · filter vs edges, from each standard's filter limit
-  [['FFP1', 25, 20], ['FFP2 / N95', 10, 6], ['FFP3', 5, 1], ['Half mask, P3', 5, 0]]
-    .forEach(([l, total, f]) => $('b2').appendChild(bar(l, [['f', f], ['e', total - f]])));
+  // 3 · filter vs edges for every mask, in the picker's protection order (same numbers as the picker)
+  const { MASKS, NONE, split } = window.RG;
+  ['none', 'cloth', 'surgical', 'ffp2ear', 'ffp1', 'ffp2', 'ffp3', 'half', 'hood', 'full', 'papr']
+    .map((id) => [NONE, ...MASKS].find((m) => m.id === id))
+    .forEach((m) => { const s = split(m); $('b2').appendChild(bar(m.name, [['f', s.filter], ['e', s.edge + s.straight]])); });
 
   // 4 · fit-test pass mark vs assigned rating, drawn as particles in per 100
   const b3 = $('b3');
