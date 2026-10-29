@@ -57,6 +57,12 @@
   .stage { position: relative; aspect-ratio: 4 / 3; max-width: 100%; }
   .stage canvas { display: block; width: 100%; height: 100%; }
   .tag { position: absolute; left: 1rem; top: .9rem; font-size: .75rem; color: var(--ink-soft); letter-spacing: .02em; }
+  .strip { display: flex; gap: .4rem; overflow-x: auto; padding: .75rem 1.1rem; border-top: 1px solid var(--line); scrollbar-width: none; }
+  .strip::-webkit-scrollbar { display: none; }
+  .chip { flex: none; font: inherit; font-size: .8rem; padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
+  .chip:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .tally { border-top: 1px solid var(--line); padding: 1rem 1.1rem 1.1rem; display: grid; gap: .8rem; }
   .tally-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-size: .875rem; }
   .tally-head strong { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -118,6 +124,7 @@
         <canvas id="scene" role="img" aria-label="Particles moving towards a face wearing the selected mask"></canvas>
         <span class="tag" id="tag">No mask</span>
       </div>
+      <div class="strip" id="strip" role="group" aria-label="Show a mask in the picture"></div>
       <div class="tally">
         <div class="tally-head"><strong id="through">100 in 100 get in</strong><span>Out of every 100 particles</span></div>
         <div class="waffle" id="waffle" aria-hidden="true"></div>
@@ -192,7 +199,7 @@
   for (let i = 0; i < 100; i++) waffle.appendChild(document.createElement('i'));
   const cells = [...waffle.children];
 
-  let eyebrow = 'Best match';
+  let eyebrow = 'Best match', current = null;
   const setFill = (el) => el.style.setProperty('--fill', `${(el.value - el.min) / (el.max - el.min) * 100}%`);
 
   function update(first) {
@@ -224,12 +231,13 @@
       btn.dataset.id = m.id;
       alts.appendChild(btn);
     });
+    current = best;
     show(first ? NONE : best);
   }
 
   function show(m) {
     const s = split(m);
-    $('eyebrow').textContent = m === NONE ? 'Starting point' : eyebrow;
+    $('eyebrow').textContent = m === NONE ? 'Starting point' : m === current ? eyebrow : 'Comparing';
     $('pick').textContent = m.name;
     $('tag').textContent = m.name;
     $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : '');
@@ -240,7 +248,9 @@
     $('leg-straight').hidden = !s.straight;
     $('n-edge').parentElement.hidden = !!s.straight;
     cells.forEach((c, i) => { c.className = i < s.filter ? 'f' : i < s.total ? 'e' : ''; });
-    document.querySelectorAll('.alt').forEach((a) => a.setAttribute('aria-pressed', String(a.dataset.id === m.id)));
+    document.querySelectorAll('.alt, .chip').forEach((a) => a.setAttribute('aria-pressed', String(a.dataset.id === m.id)));
+    const on = document.querySelector(`.chip[data-id="${m.id}"]`);
+    if (on) { const s = $('strip'); s.scrollTo({ left: on.offsetLeft - s.clientWidth / 2 + on.offsetWidth / 2, behavior: 'smooth' }); }
     $('scene').setAttribute('aria-label', s.straight ? 'No mask: every particle reaches the nose and mouth' : `${m.name}: about ${s.total} in 100 particles get in, ${s.filter} through the filter and ${s.edge} round the edges`);
     scene.setMask(m);
   }
@@ -415,6 +425,13 @@
 
   prot.addEventListener('input', () => update());
   budget.addEventListener('input', () => update());
+  const SHORT = { none: 'No mask', cloth: 'Cloth', surgical: 'Surgical', ffp1: 'FFP1', ffp2: 'FFP2 / N95', ffp3: 'FFP3', half: 'Half mask', hood: 'Powered hood', papr: 'Powered half mask' };
+  [NONE, ...MASKS].forEach((m) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.dataset.id = m.id; b.textContent = SHORT[m.id] || m.name;
+    b.addEventListener('click', () => show(m));
+    $('strip').appendChild(b);
+  });
   update(true);
 })();
 </script>
