@@ -41,6 +41,7 @@
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin: 0; }
   body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 68rem; margin-inline: auto; padding-block: 1.5rem 3rem; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); display: grid; gap: 2rem; }
@@ -124,6 +125,7 @@
           <span><i class="dot"></i>Stopped <b id="n-stop">90</b></span>
           <span><i class="dot f"></i>Through the filter <b id="n-filter">6</b></span>
           <span><i class="dot e"></i>Round the edges <b id="n-edge">4</b></span>
+          <span id="leg-straight" hidden><i class="dot e"></i>Straight in <b id="n-straight">100</b></span>
         </div>
       </div>
     </div>
@@ -172,15 +174,17 @@
     { id: 'hood', name: 'Powered hood (PAPR)', pf: 25, pfLabel: '25×', filter: .0005, price: 600, style: 'hood', note: 'A belt fan pushes filtered air into a loose hood. No seal needed, so it works with a beard.' },
     { id: 'papr', name: 'Powered half mask', pf: 50, pfLabel: '50×', filter: .0005, price: 900, style: 'papr', note: 'A fan-driven tight half mask. Workplace equipment for heavy exposure.' },
   ];
+  const NONE = { id: 'none', name: 'No mask', pf: 1, pfLabel: '1× (none)', filter: 0, price: 0, style: 'none', note: 'Everything in the air reaches your nose and mouth. Shown for comparison.' };
   const PROT = [
     { min: 1, label: 'Just a cover' }, { min: 2, label: 'A little · 2×' }, { min: 4, label: 'Some · 4×' },
     { min: 10, label: 'Good · 10×' }, { min: 20, label: 'High · 20×' }, { min: 50, label: 'Very high · 50×' },
   ];
   const BUDGET = [0.25, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, Infinity];
-  const money = (v) => v === Infinity ? 'Any' : v < 1 ? `${Math.round(v * 100)}¢` : `$${v.toLocaleString('en-US')}`;
+  const money = (v) => v === Infinity ? 'Any' : v === 0 ? '$0' : v < 1 ? `${Math.round(v * 100)}¢` : `$${v.toLocaleString('en-US')}`;
   const split = (m) => {
+    if (m.style === 'none') return { total: 100, filter: 0, edge: 0, stop: 0, straight: 100 };
     const total = Math.round(100 / m.pf), filter = Math.min(total, Math.round(m.filter * 100));
-    return { total, filter, edge: total - filter, stop: 100 - total };
+    return { total, filter, edge: total - filter, stop: 100 - total, straight: 0 };
   };
 
   const $ = (id) => document.getElementById(id);
@@ -188,6 +192,7 @@
   for (let i = 0; i < 100; i++) waffle.appendChild(document.createElement('i'));
   const cells = [...waffle.children];
 
+  let eyebrow = 'Best match';
   const setFill = (el) => el.style.setProperty('--fill', `${(el.value - el.min) / (el.max - el.min) * 100}%`);
 
   function update() {
@@ -204,36 +209,39 @@
     let best, others;
     if (fits.length) {
       best = fits[0]; others = fits.slice(1, 3);
-      $('eyebrow').textContent = 'Best match';
+      eyebrow = 'Best match';
     } else {
       const strong = MASKS.filter((m) => m.pf >= p.min).sort((x, y) => x.price - y.price)[0];
       const cheap = MASKS.filter((m) => m.price <= b).sort((x, y) => y.pf - x.pf || x.price - y.price)[0];
       best = cheap || strong; others = [strong].filter((m) => m && m !== best);
-      $('eyebrow').textContent = 'Nothing fits both. Closest within budget';
+      eyebrow = 'Nothing fits both. Closest within budget';
     }
-    [best, ...others].forEach((m, i) => {
+    [best, ...others, NONE].forEach((m, i) => {
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'alt';
-      btn.textContent = i === 0 ? m.name : `${m.name} · ${m.pfLabel} · ${money(m.price)}`;
+      btn.textContent = i === 0 ? m.name : m === NONE ? 'Compare: no mask' : `${m.name} · ${m.pfLabel} · ${money(m.price)}`;
       btn.addEventListener('click', () => show(m));
       btn.dataset.id = m.id;
-      if (others.length) alts.appendChild(btn);
+      alts.appendChild(btn);
     });
     show(best);
   }
 
   function show(m) {
     const s = split(m);
+    $('eyebrow').textContent = m === NONE ? 'For comparison' : eyebrow;
     $('pick').textContent = m.name;
     $('tag').textContent = m.name;
     $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : '');
     $('price').textContent = money(m.price);
     $('note').textContent = m.note;
     $('through').textContent = `${s.total} in 100 get in`;
-    $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge;
+    $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge; $('n-straight').textContent = s.straight;
+    $('leg-straight').hidden = !s.straight;
+    $('n-edge').parentElement.hidden = !!s.straight;
     cells.forEach((c, i) => { c.className = i < s.filter ? 'f' : i < s.total ? 'e' : ''; });
     document.querySelectorAll('.alt').forEach((a) => a.setAttribute('aria-pressed', String(a.dataset.id === m.id)));
-    $('scene').setAttribute('aria-label', `${m.name}: about ${s.total} in 100 particles get in, ${s.filter} through the filter and ${s.edge} round the edges`);
+    $('scene').setAttribute('aria-label', s.straight ? 'No mask: every particle reaches the nose and mouth' : `${m.name}: about ${s.total} in 100 particles get in, ${s.filter} through the filter and ${s.edge} round the edges`);
     scene.setMask(m);
   }
 
@@ -260,7 +268,7 @@
       visor: P('M196 112 L186 126 L186 246 C210 250 236 246 250 238 L250 108 C232 102 212 104 196 112 Z'),
     };
     const GAP_TOP = { x: 214, y: 142 }, GAP_LOW = { x: 238, y: 233 }, INHALE = { x: 214, y: 170 };
-    const frontX = () => !mask ? 205 : mask.style === 'hood' ? 182 : mask.style === 'half' || mask.style === 'papr' ? 194 : 200;
+    const frontX = () => !mask || mask.style === 'none' ? 212 : mask.style === 'hood' ? 182 : mask.style === 'half' || mask.style === 'papr' ? 194 : 200;
 
     function resize() {
       const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -275,6 +283,7 @@
     }
 
     function decide(q) {
+      if (mask.style === 'none') { q.s = 'edge2'; return; }
       const total = 1 / mask.pf, f = Math.min(total, mask.filter), u = Math.random();
       if (u < f) { q.s = 'filter'; }
       else if (u < total) { q.s = 'edge'; q.wp = mask.style === 'hood' ? { x: 200, y: 292 } : q.y < 188 ? GAP_TOP : GAP_LOW; }
@@ -284,7 +293,7 @@
     function strap(x1, y1, x2, y2, w = 1.6) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineWidth = w; ctx.strokeStyle = C['ink-soft']; ctx.globalAlpha = .5; ctx.stroke(); ctx.globalAlpha = 1; }
 
     function drawMask() {
-      if (!mask) return;
+      if (!mask || mask.style === 'none') return;
       const s = mask.style;
       ctx.save();
       ctx.lineJoin = 'round'; ctx.lineCap = 'round';
