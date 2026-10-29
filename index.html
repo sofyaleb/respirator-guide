@@ -149,6 +149,18 @@
     </div>
 
     <div class="side">
+      <div class="controls">
+        <div class="ctl">
+          <div class="ctl-head"><label for="prot">Protection</label><output id="prot-out" for="prot">Good · 10×</output></div>
+          <input type="range" id="prot" min="0" max="5" step="1" value="3">
+          <div class="ends"><span>Just a cover</span><span>Very high</span></div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-head"><label for="budget">Budget per mask</label><output id="budget-out" for="budget">Up to $5</output></div>
+          <input type="range" id="budget" min="0" max="11" step="1" value="4">
+          <div class="ends"><span>$0.25</span><span>Any</span></div>
+        </div>
+      </div>
       <section class="result" aria-live="polite">
         <span class="eyebrow" id="eyebrow">Starting point</span>
         <h2 class="pick" id="pick">No mask</h2>
@@ -163,18 +175,6 @@
         <div class="alts" id="alts"></div>
       </section>
 
-      <div class="controls">
-        <div class="ctl">
-          <div class="ctl-head"><label for="prot">Protection</label><output id="prot-out" for="prot">Good · 10×</output></div>
-          <input type="range" id="prot" min="0" max="5" step="1" value="3">
-          <div class="ends"><span>Just a cover</span><span>Very high</span></div>
-        </div>
-        <div class="ctl">
-          <div class="ctl-head"><label for="budget">Budget per mask</label><output id="budget-out" for="budget">Up to $5</output></div>
-          <input type="range" id="budget" min="0" max="11" step="1" value="4">
-          <div class="ends"><span>$0.25</span><span>Any</span></div>
-        </div>
-      </div>
     </div>
   </div>
 
