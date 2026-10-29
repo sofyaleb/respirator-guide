@@ -115,6 +115,41 @@
   .ffsvg .div { fill: var(--ink-soft); font-size: 30px; font-family: var(--font); }
   .ffsvg .val { fill: var(--ink); font-size: 16px; font-weight: 600; font-family: var(--font); }
   .ffsvg .val.in { fill: var(--edge); }
+  .ffsvg .inside { fill: var(--edge); }
+  .ffsvg .gap { fill: none; stroke: var(--edge); stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 3 3; }
+  .ffsvg .beard { fill: var(--ink-soft); opacity: .45; }
+  .ffsvg .loop { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; }
+  .ffsvg .mask.poor, .ffsvg .mask-win.poor { stroke: var(--edge); }
+  .fitbtns { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .fitbtn { font: inherit; font-size: .8rem; padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-soft); cursor: pointer; }
+  .fitbtn:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .fitbtn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .fitbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .badge { display: inline-block; font-size: .75rem; font-weight: 600; padding: .1rem .55rem; border-radius: 999px; margin-left: .4rem; vertical-align: 1px; }
+  .badge.pass { background: var(--accent-soft); color: var(--accent); }
+  .badge.fail { background: color-mix(in srgb, var(--edge) 18%, transparent); color: var(--edge); }
+  .exbars { position: relative; display: grid; gap: .4rem; }
+  .exrow { display: grid; grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr) 2.6rem; gap: .6rem; align-items: center; font-size: .82rem; font-variant-numeric: tabular-nums; }
+  .exrow b { text-align: right; font-weight: 600; }
+  .exrow b.lo { color: var(--edge); }
+  .extrack { position: relative; height: 10px; border-radius: 5px; background: var(--dot); overflow: hidden; }
+  .extrack::after { content: ""; position: absolute; top: 0; bottom: 0; left: var(--pass); border-left: 2px dashed var(--ink); opacity: .55; }
+  .extrack i { display: block; height: 100%; border-radius: 5px; background: var(--accent); }
+  .extrack i.lo { background: var(--edge); }
+  .exrow.overall { margin-top: .25rem; padding-top: .45rem; border-top: 1px solid var(--line); font-weight: 600; }
+  .exrow.overall .extrack i { background: var(--ink); }
+  .scale { position: relative; height: 4.2rem; margin: 1.9rem .6rem 0; }
+  .scale-bar { position: absolute; left: 0; right: 0; top: .6rem; height: 8px; border-radius: 4px; background: var(--dot); }
+  .scale-bar .margin { position: absolute; top: 0; bottom: 0; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 4px; }
+  .tick { position: absolute; top: 0; transform: translateX(-50%); display: grid; justify-items: center; font-size: .7rem; color: var(--ink-soft); padding-top: 1.4rem; white-space: nowrap; }
+  .tick::before { content: ""; position: absolute; top: .3rem; width: 2px; height: 1rem; background: var(--ink-soft); }
+  .tick b { font-size: .85rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tick.you { top: -1.7rem; padding-top: 0; grid-auto-flow: column; gap: .3rem; align-items: baseline; }
+  .tick.you::before { background: var(--accent); width: 3px; top: 1.15rem; height: 1.3rem; }
+  .tick.you b { color: var(--accent); }
+  .end { position: absolute; top: 1.2rem; font-size: .65rem; color: var(--ink-soft); }
+  .end.l { transform: translateX(-120%); } .end.r { transform: translateX(120%); }
+  .end.l { left: 0; top: .35rem; } .end.r { right: 0; top: .35rem; }
   .state { display: grid; gap: 1rem; }
   @media (prefers-reduced-motion: no-preference) { .state:not([hidden]) { animation: rise .45s ease; } }
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -172,7 +207,7 @@
       <section class="ch" data-step="4">
         <span class="num">5 · Passing a fit test</span>
         <h2>Passing a fit test, and the official rating</h2>
-        <p>In a fit test you wear the mask for a few minutes while breathing normally, breathing deeply, talking, turning your head and bending over. The counter works out a fit factor for each exercise and combines them into one overall score.</p>
+        <p>In a fit test you wear the mask for a few minutes while breathing normally, breathing deeply, talking, turning your head and bending over. The counter works out a fit factor for each movement and combines them into one overall score, which the weakest movements pull down the most.</p>
         <p>To pass, a half mask or disposable respirator usually needs a fit factor of at least 100. Yet its official <b>assigned</b> protection factor is only 10. That gap is deliberate: it allows for masks shifting, beards, talking and imperfect wear in real life.</p>
         <p class="soft">The counts shown are an example, not a real test.</p>
       </section>
@@ -220,14 +255,24 @@
 
       <div class="state" data-state="3" hidden>
         <span class="fig-title">What a fit test measures</span>
+        <div class="fitbtns" role="group" aria-label="Choose how well the mask fits">
+          <button type="button" class="fitbtn" data-ff="200" aria-pressed="true">Good seal</button>
+          <button type="button" class="fitbtn" data-ff="100" aria-pressed="false">Just passes</button>
+          <button type="button" class="fitbtn" data-ff="20" aria-pressed="false">Gap at the nose</button>
+          <button type="button" class="fitbtn" data-ff="5" aria-pressed="false">Beard / ear loops</button>
+        </div>
         <svg class="ffsvg" viewBox="0 0 360 268" width="100%" role="img" aria-label="Fit test: a tube samples the room air and another samples inside the mask. The room sample is packed with particles; the mask sample has one. Room 8,000 per cubic centimetre divided by mask 40 gives a fit factor of 200.">
           <!-- person in a respirator, front view -->
           <path class="body" d="M140 120 C150 112 166 110 180 110 C194 110 210 112 220 120 L232 132 L128 132 Z"/>
           <rect class="body" x="168" y="92" width="24" height="22" rx="6"/>
           <ellipse class="headf" cx="180" cy="60" rx="36" ry="44"/>
           <ellipse class="eye" cx="167" cy="50" rx="4.5" ry="2.2"/><ellipse class="eye" cx="193" cy="50" rx="4.5" ry="2.2"/>
-          <path class="mask" d="M180 64 C164 64 152 74 151 86 C150 98 164 108 180 109 C196 108 210 98 209 86 C208 74 196 64 180 64 Z"/>
-          <line class="strap" x1="152" y1="80" x2="144" y2="66"/><line class="strap" x1="208" y1="80" x2="216" y2="66"/>
+          <path id="ff-beard" class="beard" d="M150 84 C148 108 162 122 180 124 C198 122 212 108 210 84 C204 104 194 112 180 112 C166 112 156 104 150 84 Z" visibility="hidden"/>
+          <path id="ff-mask" class="mask" d="M180 64 C164 64 152 74 151 86 C150 98 164 108 180 109 C196 108 210 98 209 86 C208 74 196 64 180 64 Z"/>
+          <g id="ff-straps"><line class="strap" x1="152" y1="80" x2="144" y2="66"/><line class="strap" x1="208" y1="80" x2="216" y2="66"/></g>
+          <g id="ff-loops" visibility="hidden"><path class="loop" d="M152 80 C142 74 140 66 145 60"/><path class="loop" d="M208 80 C218 74 220 66 215 60"/></g>
+          <g id="ff-gaps" visibility="hidden"><path class="gap" d="M164 68 C168 65 172 64 176 64"/><path class="gap" d="M184 64 C188 64 192 65 196 68"/></g>
+          <g id="ff-gaps2" visibility="hidden"><path class="gap" d="M152 82 C151 88 151 94 154 99"/><path class="gap" d="M208 82 C209 88 209 94 206 99"/></g>
           <circle class="port" cx="194" cy="92" r="4"/>
           <!-- room inlet -->
           <circle class="port" cx="62" cy="66" r="4"/>
@@ -241,26 +286,38 @@
           <circle class="win" cx="92" cy="188" r="50"/>
           <g class="room"><circle cx="84.0" cy="204.0" r="2.3"/><circle cx="84.8" cy="177.9" r="2.3"/><circle cx="64.9" cy="181.8" r="1.6"/><circle cx="122.6" cy="199.7" r="2.3"/><circle cx="121.5" cy="195.1" r="2"/><circle cx="104.5" cy="193.9" r="2"/><circle cx="54.8" cy="207.1" r="1.6"/><circle cx="107.5" cy="203.3" r="1.6"/><circle cx="60.8" cy="155.9" r="1.8"/><circle cx="66.4" cy="174.5" r="1.6"/><circle cx="101.8" cy="186.5" r="1.6"/><circle cx="107.6" cy="168.8" r="2"/><circle cx="101.7" cy="200.4" r="2"/><circle cx="77.1" cy="226.8" r="1.6"/><circle cx="106.8" cy="219.8" r="1.8"/><circle cx="74.0" cy="166.5" r="2"/><circle cx="81.0" cy="184.6" r="1.8"/><circle cx="111.4" cy="195.6" r="2.3"/><circle cx="79.3" cy="160.8" r="2"/><circle cx="78.2" cy="220.4" r="2.3"/><circle cx="67.9" cy="195.3" r="1.8"/><circle cx="102.6" cy="151.0" r="2.3"/><circle cx="93.3" cy="222.8" r="2"/><circle cx="49.5" cy="181.2" r="1.6"/><circle cx="88.8" cy="163.5" r="2"/><circle cx="107.7" cy="186.0" r="1.6"/><circle cx="57.2" cy="207.7" r="1.8"/><circle cx="110.6" cy="214.3" r="2.3"/><circle cx="128.5" cy="197.2" r="1.6"/><circle cx="95.2" cy="153.3" r="2"/><circle cx="110.3" cy="169.8" r="1.6"/><circle cx="80.0" cy="154.6" r="1.6"/><circle cx="64.8" cy="173.0" r="2"/><circle cx="115.9" cy="150.2" r="1.6"/><circle cx="55.0" cy="194.1" r="1.8"/><circle cx="127.8" cy="202.3" r="1.6"/><circle cx="64.4" cy="151.4" r="2"/><circle cx="102.7" cy="165.9" r="1.6"/><circle cx="63.7" cy="212.7" r="2.3"/><circle cx="122.9" cy="192.4" r="1.6"/><circle cx="99.8" cy="201.7" r="2"/><circle cx="129.6" cy="202.6" r="2.3"/><circle cx="107.7" cy="204.6" r="2"/><circle cx="58.8" cy="215.2" r="1.8"/><circle cx="119.0" cy="203.0" r="1.6"/><circle cx="50.8" cy="174.8" r="1.8"/><circle cx="110.0" cy="149.2" r="1.6"/><circle cx="86.7" cy="217.2" r="1.8"/><circle cx="64.7" cy="221.5" r="2"/><circle cx="109.2" cy="183.3" r="1.6"/><circle cx="101.9" cy="207.8" r="1.8"/><circle cx="95.3" cy="219.9" r="1.8"/><circle cx="72.0" cy="175.5" r="2"/><circle cx="121.8" cy="188.8" r="2"/><circle cx="68.4" cy="213.3" r="1.8"/><circle cx="128.6" cy="176.9" r="2"/><circle cx="56.0" cy="184.5" r="2.3"/><circle cx="87.2" cy="178.4" r="1.8"/><circle cx="124.8" cy="164.0" r="2"/><circle cx="121.0" cy="158.9" r="2"/><circle cx="69.3" cy="206.2" r="1.6"/><circle cx="121.2" cy="210.2" r="2"/><circle cx="103.0" cy="192.6" r="1.6"/><circle cx="96.7" cy="205.9" r="1.6"/><circle cx="86.3" cy="196.9" r="1.6"/><circle cx="109.9" cy="188.0" r="1.8"/><circle cx="114.3" cy="204.5" r="2.3"/><circle cx="134.5" cy="194.9" r="1.8"/><circle cx="78.6" cy="176.4" r="2.3"/><circle cx="91.6" cy="215.1" r="1.6"/><circle cx="81.4" cy="200.1" r="2.3"/><circle cx="118.7" cy="150.7" r="2.3"/><circle cx="60.7" cy="194.8" r="2.3"/><circle cx="104.6" cy="195.6" r="2"/><circle cx="79.0" cy="207.8" r="1.8"/><circle cx="100.8" cy="171.7" r="1.8"/><circle cx="136.4" cy="194.5" r="2"/><circle cx="74.7" cy="184.9" r="1.8"/><circle cx="84.7" cy="186.0" r="1.8"/><circle cx="47.2" cy="180.0" r="2.3"/><circle cx="117.1" cy="158.9" r="2"/><circle cx="90.1" cy="215.8" r="1.6"/><circle cx="112.1" cy="223.0" r="1.8"/><circle cx="52.2" cy="179.7" r="1.6"/><circle cx="81.6" cy="207.1" r="1.6"/><circle cx="109.2" cy="145.7" r="2"/><circle cx="116.8" cy="155.0" r="2.3"/><circle cx="108.5" cy="152.0" r="1.8"/><circle cx="96.8" cy="220.7" r="1.6"/><circle cx="87.2" cy="194.2" r="1.6"/><circle cx="115.9" cy="192.2" r="2.3"/><circle cx="89.8" cy="226.2" r="2"/><circle cx="121.6" cy="179.7" r="1.8"/><circle cx="134.2" cy="170.4" r="2"/><circle cx="118.7" cy="180.3" r="1.6"/><circle cx="96.0" cy="209.5" r="2.3"/><circle cx="98.8" cy="207.6" r="1.8"/><circle cx="61.0" cy="157.3" r="1.8"/><circle cx="109.1" cy="161.2" r="2"/><circle cx="68.4" cy="154.3" r="2.3"/><circle cx="124.2" cy="207.0" r="1.6"/><circle cx="126.3" cy="166.2" r="2"/><circle cx="92.0" cy="156.2" r="2"/><circle cx="109.7" cy="224.8" r="2"/><circle cx="71.6" cy="223.8" r="2"/><circle cx="120.5" cy="182.9" r="1.8"/><circle cx="55.6" cy="214.0" r="1.6"/><circle cx="89.0" cy="169.3" r="2"/><circle cx="104.5" cy="200.8" r="1.8"/><circle cx="126.1" cy="164.7" r="2"/><circle cx="117.4" cy="221.2" r="1.8"/><circle cx="129.0" cy="183.4" r="1.6"/><circle cx="71.9" cy="215.5" r="2"/><circle cx="95.7" cy="192.0" r="2.3"/><circle cx="128.5" cy="181.3" r="1.6"/><circle cx="48.2" cy="180.6" r="2.3"/><circle cx="52.7" cy="205.4" r="2"/><circle cx="101.7" cy="169.2" r="1.8"/><circle cx="91.7" cy="212.9" r="1.8"/><circle cx="94.1" cy="223.2" r="1.6"/><circle cx="90.2" cy="217.7" r="1.6"/><circle cx="121.8" cy="220.2" r="2"/><circle cx="73.1" cy="212.7" r="1.6"/><circle cx="54.1" cy="166.1" r="1.8"/><circle cx="53.3" cy="209.1" r="2.3"/><circle cx="58.5" cy="187.7" r="1.6"/><circle cx="85.8" cy="187.1" r="2.3"/><circle cx="73.7" cy="195.2" r="1.6"/><circle cx="133.1" cy="189.0" r="2"/><circle cx="106.8" cy="216.0" r="2"/><circle cx="86.7" cy="154.1" r="1.8"/><circle cx="76.8" cy="217.4" r="1.6"/><circle cx="53.7" cy="174.1" r="1.8"/><circle cx="119.1" cy="209.3" r="2.3"/><circle cx="92.2" cy="212.2" r="2"/><circle cx="96.6" cy="155.5" r="2.3"/><circle cx="54.9" cy="172.8" r="1.8"/><circle cx="118.1" cy="172.0" r="2"/><circle cx="67.1" cy="166.8" r="1.8"/><circle cx="53.8" cy="185.1" r="1.6"/><circle cx="59.9" cy="197.9" r="2.3"/><circle cx="47.8" cy="194.1" r="1.8"/><circle cx="78.5" cy="147.1" r="1.6"/><circle cx="113.9" cy="179.7" r="1.8"/><circle cx="50.4" cy="171.7" r="1.6"/><circle cx="101.1" cy="173.6" r="1.6"/><circle cx="114.1" cy="209.2" r="1.6"/><circle cx="112.3" cy="197.9" r="1.8"/><circle cx="125.7" cy="204.7" r="2"/><circle cx="101.2" cy="145.4" r="1.6"/><circle cx="114.0" cy="220.1" r="2.3"/><circle cx="82.7" cy="173.3" r="2.3"/><circle cx="125.5" cy="157.6" r="1.6"/><circle cx="100.5" cy="232.1" r="1.6"/><circle cx="66.2" cy="207.2" r="1.8"/><circle cx="133.9" cy="185.3" r="2.3"/><circle cx="108.0" cy="213.7" r="2"/><circle cx="65.3" cy="185.4" r="1.6"/><circle cx="100.7" cy="212.5" r="2.3"/><circle cx="90.9" cy="181.7" r="1.6"/></g>
           <circle class="win mask-win" cx="268" cy="188" r="50"/>
-          <circle class="inside" cx="276" cy="178" r="3.4"/>
+          <g id="ff-in"></g>
           <text x="180" y="198" class="div" text-anchor="middle">÷</text>
           <text x="92" y="254" class="val" text-anchor="middle">8,000</text>
-          <text x="268" y="254" class="val in" text-anchor="middle">40</text>
+          <text x="268" y="254" class="val in" text-anchor="middle" id="ff-inval">40</text>
           <text x="92" y="266" class="lab small" text-anchor="middle">particles per cm³</text>
           <text x="268" y="266" class="lab small" text-anchor="middle">particles per cm³</text>
         </svg>
-        <div class="ff">8,000 ÷ 40 = fit factor <b>200</b></div>
-        <p class="fig-note">For every 200 particles in the room, 1 got inside the mask. The counter compares the two samples while you breathe, talk and move. Example numbers.</p>
+        <div class="ff"><span id="ff-sum">8,000 ÷ 40 = fit factor <b>200</b></span> <span class="badge pass" id="ff-badge">Pass</span></div>
+        <p class="fig-note" id="ff-note">For every 200 particles in the room, 1 got inside the mask. A fit test needs at least 100 to pass. Example numbers.</p>
       </div>
 
       <div class="state" data-state="4" hidden>
-        <span class="fig-title">Example fit test</span>
-        <div class="counters">
-          <div class="counter"><span>Outside the mask</span><b>8,000</b><span>particles per cm³</span></div>
-          <div class="counter"><span>Inside the mask</span><b>40</b><span>particles per cm³</span></div>
+        <span class="fig-title">Example fit test, movement by movement</span>
+        <div class="exbars" style="--pass:66.7%">
+          <div class="exrow"><span>Normal breathing</span><div class="extrack"><i class="" style="width:83.0%"></i></div><b class="">310</b></div>
+          <div class="exrow"><span>Deep breathing</span><div class="extrack"><i class="" style="width:79.3%"></i></div><b class="">240</b></div>
+          <div class="exrow"><span>Turning head</span><div class="extrack"><i class="" style="width:72.5%"></i></div><b class="">150</b></div>
+          <div class="exrow"><span>Nodding</span><div class="extrack"><i class="" style="width:69.3%"></i></div><b class="">120</b></div>
+          <div class="exrow"><span>Talking</span><div class="extrack"><i class="" style="width:75.2%"></i></div><b class="">180</b></div>
+          <div class="exrow"><span>Bending over</span><div class="extrack"><i class="lo" style="width:65.1%"></i></div><b class="lo">90</b></div>
+          <div class="exrow overall"><span>Overall score</span><div class="extrack"><i style="width:72.9%"></i></div><b>154</b></div>
         </div>
-        <div class="ff">Fit factor = 8,000 ÷ 40 = <b>200</b>, a pass (100 or more needed)</div>
-        <div class="bars" id="b3"></div>
-        <p class="fig-note">Bars show particles in per 100. The official rating assumes ten times more gets in than a passing fit test, to leave a safety margin.</p>
+        <p class="fig-note">Dashed line: pass mark of 100. Bending over scored 90, but the overall score of 154 still passes. The overall is weighted towards the weakest movements.</p>
+        <span class="fig-title">How the numbers compare</span>
+        <div class="scale" aria-label="Scale from 1 to 1,000: official rating 10, pass mark 100, this test 154">
+          <div class="scale-bar"><span class="margin" style="left:33.3%;width:calc(66.7% - 33.3%)"></span></div>
+          <span class="tick" style="left:33.3%"><b>10×</b>official rating</span>
+          <span class="tick" style="left:66.7%"><b>100×</b>pass mark</span>
+          <span class="tick you" style="left:72.9%"><b>154×</b>this test</span>
+          <span class="end l">1×</span><span class="end r">1,000×</span>
+        </div>
+        <p class="fig-note">The shaded gap is the safety margin: the official rating assumes ten times more gets in than a passing fit test, to allow for masks shifting, talking and imperfect wear. Example numbers.</p>
       </div>
 
       <div class="state" data-state="5" hidden>
@@ -327,11 +384,40 @@
     .map((id) => [NONE, ...MASKS].find((m) => m.id === id))
     .forEach((m) => { const s = split(m); $('b2').appendChild(bar(m.name, [['f', s.filter], ['e', s.edge + s.straight]])); });
 
-  // 4 · fit-test pass mark vs assigned rating, drawn as particles in per 100
-  const b3 = $('b3');
-  const r1 = bar('Fit test pass', [['e', 1]]); r1.querySelector('b').textContent = '100×';
-  const r2 = bar('Assigned rating', [['e', 10]]); r2.querySelector('b').textContent = '10×';
-  b3.append(r1, r2);
+
+  // 4 · fit factor: good and bad fits change the mask sample, the drawing and the result
+  const ROOM = 8000, NS = 'http://www.w3.org/2000/svg';
+  const FITS = {
+    200: { note: 'For every 200 particles in the room, 1 got inside the mask.', gaps: 0 },
+    100: { note: 'For every 100 particles in the room, 1 got inside. Exactly at the pass mark.', gaps: 0 },
+    20: { note: 'A gap at the nose lets unfiltered air in: 1 in every 20 room particles gets inside.', gaps: 1 },
+    5: { note: 'Hair under the edge, or ear loops that pull it loose, break the seal: 1 in every 5 gets inside.', gaps: 2 },
+  };
+  let seed = 3; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const fitDots = {};
+  [200, 100, 20, 5].forEach((ff) => {
+    seed = 3 + ff; const n = Math.round(200 / ff), pts = [];
+    for (let i = 0; i < n; i++) { const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 44; pts.push([268 + Math.cos(a) * r, 188 + Math.sin(a) * r]); }
+    fitDots[ff] = pts;
+  });
+  const drawFit = (ff) => {
+    const f = FITS[ff], g = $('ff-in'), inside = ROOM / ff, pass = ff >= 100;
+    g.replaceChildren(...fitDots[ff].map(([x, y]) => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', x.toFixed(1)); c.setAttribute('cy', y.toFixed(1)); c.setAttribute('r', fitDots[ff].length > 10 ? 2.2 : 3.4); c.setAttribute('class', 'inside'); return c; }));
+    $('ff-inval').textContent = inside.toLocaleString('en-US');
+    $('ff-sum').replaceChildren(document.createTextNode(`8,000 ÷ ${inside.toLocaleString('en-US')} = fit factor `), Object.assign(document.createElement('b'), { textContent: ff }));
+    $('ff-badge').textContent = pass ? 'Pass' : 'Fail'; $('ff-badge').className = 'badge ' + (pass ? 'pass' : 'fail');
+    $('ff-note').textContent = `${f.note} A fit test needs at least 100 to pass. Example numbers.`;
+    $('ff-mask').classList.toggle('poor', !pass);
+    document.querySelector('.ffsvg .mask-win').classList.toggle('poor', !pass);
+    $('ff-gaps').setAttribute('visibility', f.gaps >= 1 ? 'visible' : 'hidden');
+    $('ff-gaps2').setAttribute('visibility', f.gaps >= 2 ? 'visible' : 'hidden');
+    $('ff-beard').setAttribute('visibility', f.gaps >= 2 ? 'visible' : 'hidden');
+    $('ff-loops').setAttribute('visibility', f.gaps >= 2 ? 'visible' : 'hidden');
+    $('ff-straps').setAttribute('visibility', f.gaps >= 2 ? 'hidden' : 'visible');
+    document.querySelectorAll('.fitbtn').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.ff === ff)));
+  };
+  document.querySelectorAll('.fitbtn').forEach((b) => b.addEventListener('click', () => drawFit(+b.dataset.ff)));
+  drawFit(200);
 
   // 5 · time calculator
   const draw4 = () => {
