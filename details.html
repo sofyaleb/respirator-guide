@@ -98,6 +98,7 @@
   .rp-tile .rp-n { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; }
   .rp-section { display: grid; gap: var(--cds-gap-md); }
   .rp-h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .rp-note a { color: var(--color-fg); }
   .rp-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.5; max-width: 70ch; }
   .rp-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
   .rp-chip { font: inherit; font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg-muted); cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; }
@@ -190,12 +191,13 @@
   </section>
 
   <section class="rp-section">
-    <h2 class="rp-h2">What the terms mean</h2>
+    <div>
+      <h2 class="rp-h2">Reading the table and labels</h2>
+      <p class="rp-note">New to protection factors and fit tests? <a href="explain.html">How protection works</a> explains them step by step.</p>
+    </div>
     <dl class="rp-defs">
-      <div><dt>Protection factor</dt><dd>How many times less contaminant reaches your lungs compared with the air outside. A factor of ten means you breathe a tenth of what is around you. Official "assigned" factors come from workplace safety bodies and assume the mask fits and is worn correctly.</dd></div>
-      <div><dt>Filter efficiency</dt><dd>The share of test particles the filter material stops in the lab. It says nothing about air that sneaks round the edges, which is why a high filter number alone can mislead.</dd></div>
+      <div><dt>Filter efficiency</dt><dd>The share of test particles the filter material stops in the lab. It ignores air that leaks round the edges.</dd></div>
       <div><dt>Total inward leakage</dt><dd>Everything that gets past the mask on a real person: through the filter, round the face seal and through any valve. European and several Asian standards test this; the US rating tests the filter only and relies on fit testing at work.</dd></div>
-      <div><dt>Fit test</dt><dd>A check, usually with a taste test or a particle counter, that a specific mask model seals on your face. A quick "fit check" each time you put it on is different, and is something everyone can do.</dd></div>
       <div><dt>N, R and P</dt><dd>In US ratings the letter is about oil. N is not resistant to oily particles, R is somewhat resistant and P is strongly resistant. For everyday air, smoke and viruses, N is fine.</dd></div>
       <div><dt>NR and R markings</dt><dd>On EU masks, NR means single shift only and R means it can be reused. A D marking means it passed an extra clogging test with dolomite dust.</dd></div>
     </dl>
@@ -229,13 +231,8 @@
   </section>
 
   <section class="rp-section" id="fit">
-    <h2 class="rp-h2">Why fit matters more than the class</h2>
+    <h2 class="rp-h2">Getting a good fit</h2>
     <div class="rp-grid3">
-      <div class="rp-card">
-        <h3>Air takes the easy way in</h3>
-        <p>Breathing pulls air through whatever path resists least. A gap at the nose or cheek lets unfiltered air bypass the filter entirely.</p>
-        <p>That is why a disposable N100 gets the same official factor as an N95: past a point, the seal limits protection, not the filter.</p>
-      </div>
       <div class="rp-card">
         <h3>What breaks a seal</h3>
         <p>Facial hair under the edge, the wrong size or shape for your face, loose or crossed straps, and a nose clip that has not been pinched to shape.</p>
