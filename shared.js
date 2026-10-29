@@ -253,6 +253,10 @@ window.RG = (() => {
           q.hold -= dt; q.ring = (q.ring + dt * 1.2) % 1;
           q.x = q.tx + Math.sin(clock * 9 + q.sx) * 1.2; q.y = q.ty + Math.cos(clock * 7 + q.sy) * 1.2;
         }
+        else if (q.fate === 'edge') {
+          // after lingering, it slips in under the edge: shrink and fade right at the gap, never crossing the mask
+          q.a -= dt * 1.4; q.r = Math.max(.4, q.r - dt * 1.2); q.ring = Math.min(1, q.ring + dt * 1.6);
+        }
         else {
           q.ring += dt * 1.6;
           const sp = q.s === 'through' ? 16 : 34;
