@@ -1,5 +1,6 @@
-# Respirator Protection Compared
+# Respirator Guide
 
-An interactive comparison of FFP1/2/3, N95, KN95, KF94, P2, surgical, cloth, reusable and powered respirators by protection factor.
+A simple mask picker: slide to the protection you want and your budget, and see which mask fits. The full comparison is on the details page.
 
-Live page: https://sofyaleb.github.io/respirator-guide/
+- Picker: https://sofyaleb.github.io/respirator-guide/
+- Details: https://sofyaleb.github.io/respirator-guide/details.html
