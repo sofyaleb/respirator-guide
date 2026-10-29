@@ -97,6 +97,20 @@
   .timeline { display: grid; gap: .4rem; font-size: .8rem; color: var(--ink-soft); }
   .tl { height: 14px; border-radius: 7px; background: var(--dot); overflow: hidden; }
   .tl span { display: block; height: 100%; background: var(--edge); border-radius: 7px; transition: width .4s ease; }
+  .ffsvg { max-width: 100%; height: auto; }
+  .ffsvg .lab { fill: var(--ink-soft); font-size: 12px; font-family: var(--font); }
+  .ffsvg .lab.small { font-size: 10.5px; }
+  .ffsvg .room circle { fill: var(--ink-soft); opacity: .55; }
+  .ffsvg .head { fill: var(--dot); }
+  .ffsvg .mask { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+  .ffsvg .inside { fill: var(--edge); }
+  .ffsvg .tube { fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-dasharray: 1 0; opacity: .7; }
+  .ffsvg .probe { fill: var(--ink-soft); }
+  .ffsvg .box { fill: var(--bg); stroke: var(--line); }
+  .ffsvg .val { fill: var(--ink); font-size: 14px; font-weight: 600; font-family: var(--font); }
+  .ffsvg .val.in { fill: var(--edge); } .ffsvg .val.ff { fill: var(--accent); }
+  .ffsvg .rule { stroke: var(--line); }
+  .ffsvg .lead { stroke: var(--ink-soft); opacity: .6; }
   .state { display: grid; gap: 1rem; }
   @media (prefers-reduced-motion: no-preference) { .state:not([hidden]) { animation: rise .45s ease; } }
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -113,7 +127,7 @@
 
   <header>
     <h1>How a protection factor works</h1>
-    <p class="lede">The number on a mask's rating is easy to misread. Five short steps explain what it means, why fit matters more than the filter, and how time adds up. Swipe, use the arrows or press → to move on.</p>
+    <p class="lede">The number on a mask's rating is easy to misread. Six short steps explain what it means, why fit matters more than the filter, and how time adds up. Swipe, use the arrows or press → to move on.</p>
   </header>
 
   <div class="story">
@@ -143,15 +157,24 @@
       </section>
 
       <section class="ch" data-step="3">
-        <span class="num">4 · How it's measured</span>
-        <h2>A fit test counts particles both sides of the mask</h2>
-        <p>In a quantitative fit test, a machine counts tiny particles in the room and inside your mask while you breathe, talk, turn your head and bend over. Outside divided by inside is your <b>fit factor</b> for that mask, on your face, on that day.</p>
+        <span class="num">4 · Fit factor</span>
+        <h2>What a fit factor is</h2>
+        <p>A <b>fit factor</b> measures how well one mask seals on one person's face. It compares the particles in the room with the particles that end up inside the mask.</p>
+        <p class="formula">Fit factor = particles in the room ÷ particles inside the mask</p>
+        <p>A fit factor of 200 means that for every 200 particles in the room, only 1 made it inside, whether through the filter or round the edges.</p>
+        <p>It differs from a protection factor in two ways. It is measured during a short test rather than in everyday wear. And it belongs to you and that mask: the same mask can score 300 on one face and 20 on another.</p>
+      </section>
+
+      <section class="ch" data-step="4">
+        <span class="num">5 · Passing a fit test</span>
+        <h2>Passing a fit test, and the official rating</h2>
+        <p>In a fit test you wear the mask for a few minutes while breathing normally, breathing deeply, talking, turning your head and bending over. The counter works out a fit factor for each exercise and combines them into one overall score.</p>
         <p>To pass, a half mask or disposable respirator usually needs a fit factor of at least 100. Yet its official <b>assigned</b> protection factor is only 10. That gap is deliberate: it allows for masks shifting, beards, talking and imperfect wear in real life.</p>
         <p class="soft">The counts shown are an example, not a real test.</p>
       </section>
 
-      <section class="ch" data-step="4">
-        <span class="num">5 · Time adds up</span>
+      <section class="ch" data-step="5">
+        <span class="num">6 · Time adds up</span>
         <h2>A mask slows the clock</h2>
         <p>The longer you breathe the same air, the more you take in. A protection factor works like slowing that clock down: in a 5× mask, every 5 minutes count like 1 minute with no mask.</p>
         <p class="formula">Time spent ÷ protection factor = the same as this long with no mask</p>
@@ -164,7 +187,7 @@
       <button type="button" class="pg-btn" id="pg-prev" aria-label="Previous step">&larr;</button>
       <div class="pg-dots" id="pg-dots" role="group" aria-label="Go to step"></div>
       <button type="button" class="pg-btn" id="pg-next" aria-label="Next step">&rarr;</button>
-      <span class="pg-count" id="pg-count">1 / 5</span>
+      <span class="pg-count" id="pg-count">1 / 6</span>
     </div>
     </div>
 
@@ -192,6 +215,30 @@
       </div>
 
       <div class="state" data-state="3" hidden>
+        <span class="fig-title">What a fit test measures</span>
+        <svg class="ffsvg" viewBox="0 0 360 230" width="100%" role="img" aria-label="A particle counter with one tube sampling the room and one sampling inside the mask. Room: 8,000. Inside the mask: 40.">
+          <text x="14" y="24" class="lab">In the room</text>
+          <g class="room"><circle cx="44" cy="121" r="2"/><circle cx="64" cy="166" r="2"/><circle cx="25" cy="61" r="2"/><circle cx="65" cy="184" r="2.5"/><circle cx="21" cy="100" r="2.5"/><circle cx="49" cy="88" r="2"/><circle cx="47" cy="98" r="2"/><circle cx="47" cy="113" r="2"/><circle cx="35" cy="123" r="2.5"/><circle cx="61" cy="66" r="2.5"/><circle cx="63" cy="173" r="2"/><circle cx="36" cy="107" r="3"/><circle cx="49" cy="66" r="2.5"/><circle cx="14" cy="118" r="2.5"/><circle cx="79" cy="93" r="3"/><circle cx="68" cy="197" r="2.5"/><circle cx="69" cy="159" r="2"/><circle cx="43" cy="122" r="2.5"/><circle cx="19" cy="64" r="2"/><circle cx="73" cy="204" r="2.5"/><circle cx="80" cy="180" r="3"/><circle cx="57" cy="81" r="2"/><circle cx="22" cy="149" r="2"/><circle cx="70" cy="114" r="2"/><circle cx="59" cy="155" r="2.5"/><circle cx="85" cy="94" r="2.5"/><circle cx="26" cy="59" r="2"/><circle cx="49" cy="193" r="2"/><circle cx="29" cy="128" r="2"/><circle cx="51" cy="161" r="2"/><circle cx="19" cy="135" r="2"/><circle cx="50" cy="127" r="2"/><circle cx="55" cy="117" r="2.5"/><circle cx="33" cy="210" r="3"/><circle cx="23" cy="119" r="2"/><circle cx="70" cy="118" r="2"/><circle cx="46" cy="141" r="2"/><circle cx="56" cy="190" r="2"/><circle cx="60" cy="55" r="3"/><circle cx="35" cy="137" r="2.5"/><circle cx="51" cy="190" r="2"/><circle cx="70" cy="97" r="3"/><circle cx="40" cy="73" r="2"/><circle cx="21" cy="58" r="2"/><circle cx="90" cy="82" r="2"/><circle cx="83" cy="169" r="2"/></g>
+          <path class="head" d="M182 34 C152 34 136 56 134 82 L131 98 L117 116 L128 122 L127 134 L133 140 L128 147 C130 158 137 165 148 167 L154 172 L154 226 L214 226 C210 198 218 174 220 146 C224 82 212 34 182 34 Z"/>
+          <path class="mask" d="M133 100 C118 108 108 124 110 140 C112 158 128 170 150 170 C160 166 166 158 168 150 C166 134 164 118 160 106 C152 100 142 98 133 100 Z"/>
+          <circle class="inside" cx="124" cy="134" r="3.2"/>
+          <line x1="126" y1="142" x2="132" y2="186" class="rule lead"/><text x="132" y="198" class="lab small" text-anchor="middle">Inside the mask</text>
+          <path class="tube" d="M60 52 C60 20 250 20 262 70"/>
+          <circle class="probe" cx="60" cy="54" r="3.5"/>
+          <path class="tube" d="M114 136 C96 150 150 222 200 218 C240 214 252 192 262 170"/>
+          <circle class="probe" cx="114" cy="136" r="3.5"/>
+          <rect class="box" x="240" y="66" width="108" height="110" rx="12"/>
+          <text x="252" y="88" class="lab small">Particle counter</text>
+          <text x="252" y="112" class="lab small">Room</text><text x="336" y="112" class="val" text-anchor="end">8,000</text>
+          <text x="252" y="136" class="lab small">Mask</text><text x="336" y="136" class="val in" text-anchor="end">40</text>
+          <line x1="252" y1="146" x2="336" y2="146" class="rule"/>
+          <text x="252" y="164" class="lab small">Fit factor</text><text x="336" y="164" class="val ff" text-anchor="end">200</text>
+        </svg>
+        <div class="ff">Fit factor = 8,000 ÷ 40 = <b>200</b></div>
+        <p class="fig-note">One tube samples the room, the other samples the air inside the mask, while you breathe, talk and move. Example numbers.</p>
+      </div>
+
+      <div class="state" data-state="4" hidden>
         <span class="fig-title">Example fit test</span>
         <div class="counters">
           <div class="counter"><span>Outside the mask</span><b>8,000</b><span>particles per cm³</span></div>
@@ -202,7 +249,7 @@
         <p class="fig-note">Bars show particles in per 100. The official rating assumes ten times more gets in than a passing fit test, to leave a safety margin.</p>
       </div>
 
-      <div class="state" data-state="4" hidden>
+      <div class="state" data-state="5" hidden>
         <span class="fig-title">Time calculator</span>
         <div class="calc">
           <label for="c-mask">Mask</label>
