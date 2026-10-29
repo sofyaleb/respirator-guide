@@ -1,0 +1,295 @@
+// Shared by the picker and the mask gallery: the mask data and the animated face drawing.
+window.RG = (() => {
+  // pf: protection factor. filter: share of particles that pass through the filter material itself
+  // (from each standard's filter limit; illustrative for cloth and surgical). The rest of 1/pf leaks round the edges.
+  const MASKS = [
+    { id: 'cloth', name: 'Cloth mask', tech: 'Reusable cloth face covering (no standard)', pf: 1.5, pfLabel: '~1–2×', filter: .4, price: 6, style: 'cloth', est: true, note: 'Washable and reusable, but air leaks round the edges. Fine as a cover, not as protection.' },
+    { id: 'surgical', name: 'Face mask', tech: 'Surgical mask · EN 14683 Type I / II / IIR (US: ASTM F2100)', pf: 3, pfLabel: '~2–5×', filter: .1, price: 0.15, style: 'surgical', est: true, note: 'Blocks splashes and your own droplets. It sits loosely, so most of what you breathe comes round the sides.' },
+    { id: 'ffp1', name: 'Dust mask', tech: 'FFP1 filtering facepiece · EN 149', pf: 4, pfLabel: '4×', filter: .2, price: 0.6, style: 'ffp', note: 'The basic sealed respirator. Good for nuisance dust, not for smoke or infections.' },
+    { id: 'ffp2', name: 'Disposable respirator', tech: 'FFP2 filtering facepiece (EN 149) · N95 (NIOSH) · KN95 (GB 2626), with head straps', pf: 10, pfLabel: '10×', filter: .06, price: 1, style: 'ffp', note: 'The everyday respirator for smoke, crowded places and viral illness. Pick one with head-and-neck straps, not ear loops, and pinch the nose clip for a good seal.' },
+    { id: 'ffp2ear', name: 'Ear-loop respirator', tech: 'FFP2 / KN95 with ear loops · not approved as N95 by NIOSH; UK HSE warns against them', pf: 3, pfLabel: 'often well under 10×', ill: true, noRec: true, filter: .06, price: 0.7, style: 'ffpear', note: 'Same filter, but ear loops rarely hold a seal. In a review of 29 fit-testing studies, about 4 in 100 ear-loop fit tests passed, against about 80 in 100 for folded respirators with head straps.' },
+    { id: 'ffp3', name: 'High-protection disposable respirator', tech: 'FFP3 filtering facepiece · EN 149, often with an exhalation valve', pf: 20, pfLabel: '20×', filter: .01, price: 4, style: 'ffp3', note: 'The highest disposable class, used in high-risk healthcare. Often has a valve to make breathing out easier.' },
+    { id: 'half', name: 'Half face respirator', tech: 'Reusable elastomeric half mask · EN 140, with P3 (EN 143) or NIOSH P100 filters', pf: 20, pfLabel: '10–20×', filter: .0005, price: 40, style: 'half', note: 'Rubber face piece with P3 or P100 filters you replace. Cheap per day if you wear one a lot.' },
+    { id: 'full', name: 'Full face respirator', tech: 'Full-face mask · EN 136, with P3 (EN 143) or NIOSH P100 filters', pf: 40, pfLabel: '40–50×', filter: .0005, price: 200, style: 'full', note: 'Rubber mask with a clear visor and replaceable P3 or P100 filters. Covers your eyes too.' },
+    { id: 'hood', name: 'Powered helmet', tech: 'Loose-fitting powered air-purifying respirator (PAPR) · EN 12941 TH2 / TH3', pf: 25, pfLabel: '25×', filter: .0005, price: 600, style: 'hood', note: 'A belt fan pushes filtered air into a helmet with a clear face shield. No tight seal needed, so it works with a beard.' },
+    { id: 'papr', name: 'Powered half face respirator', tech: 'Tight-fitting half-mask PAPR · EN 12942', pf: 50, pfLabel: '50×', filter: .0005, price: 900, style: 'papr', note: 'A fan-driven tight half mask. Workplace equipment for heavy exposure.' },
+  ];
+  const NONE = { id: 'none', name: 'No mask', tech: 'No respiratory protection', pf: 1, pfLabel: '1× (none)', filter: 0, price: 0, style: 'none', note: 'Everything in the air reaches your nose and mouth. Move a slider or tap a mask to see the difference.' };
+  const money = (v) => v === Infinity ? 'Any' : v === 0 ? '$0' : v < 1 ? `${Math.round(v * 100)}¢` : `$${v.toLocaleString('en-US')}`;
+  const split = (m) => {
+    if (m.style === 'none') return { total: 100, filter: 0, edge: 0, stop: 0, straight: 100 };
+    const total = Math.round(100 / m.pf), filter = Math.min(total, Math.round(m.filter * 100));
+    return { total, filter, edge: total - filter, stop: 100 - total, straight: 0 };
+  };
+
+  // ---- Particle scene: a face seen from the front, drawn in a 400 × 300 box and scaled to fit ----
+  function createScene(cv) {
+    const ctx = cv.getContext('2d');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    let C = {}, mask = null, parts = [], scale = 1, ox = 0, oy = 0, last = 0, clock = 0, spawnAcc = 0;
+    const readColors = () => {
+      C = {}; ['face', 'face-2', 'accent', 'accent-soft', 'particle', 'filter', 'edge', 'surface', 'line', 'rubber', 'ink-soft', 'cart', 'strap2', 'strap3']
+        .forEach((k) => { C[k] = css('--' + k); });
+    };
+
+    const P = (d) => new Path2D(d);
+    const F = {
+      head: P('M200 22 C150 22 122 60 122 112 C122 150 128 186 142 214 C156 242 178 258 200 258 C222 258 244 242 258 214 C272 186 278 150 278 112 C278 60 250 22 200 22 Z'),
+      hair: P('M200 22 C150 22 122 60 122 110 C138 76 168 62 200 62 C232 62 262 76 278 110 C278 60 250 22 200 22 Z'),
+      neck: P('M168 236 L168 270 C130 278 92 288 66 300 L334 300 C308 288 270 278 232 270 L232 236 Z'),
+    };
+    const S = {
+      flat: P('M142 150 C170 141 230 141 258 150 L262 222 C236 236 164 236 138 222 Z'),
+      flat3: P('M200 132 C176 132 154 140 144 152 C140 176 142 200 150 220 C164 240 184 248 200 248 C216 248 236 240 250 220 C258 200 260 176 256 152 C246 140 224 132 200 132 Z'),
+      cup: P('M200 127 C175 127 150 146 144 176 C139 207 166 245 200 249 C234 245 261 207 256 176 C250 146 225 127 200 127 Z'),
+      half: P('M200 124 C186 124 172 148 160 176 C151 198 159 222 176 233 C187 239 213 239 224 233 C241 222 249 198 240 176 C228 148 214 124 200 124 Z'),
+      full: P('M200 34 C150 34 126 70 126 118 C126 160 132 200 150 230 C164 252 182 262 200 262 C218 262 236 252 250 230 C268 200 274 160 274 118 C274 70 250 34 200 34 Z'),
+      fullLens: P('M200 46 C158 46 138 76 138 118 C138 156 144 190 158 214 C170 234 184 242 200 242 C216 242 230 234 242 214 C256 190 262 156 262 118 C262 76 242 46 200 46 Z'),
+      nosecup: P('M200 140 C180 140 165 160 163 184 C161 206 177 224 200 226 C223 224 239 206 237 184 C235 160 220 140 200 140 Z'),
+      helmet: P('M108 120 C108 52 150 8 200 8 C250 8 292 52 292 120 Z'),
+      shield: P('M120 118 L280 118 L272 234 C254 258 228 266 200 266 C172 266 146 258 128 234 Z'),
+      seal: P('M128 234 C146 258 172 266 200 266 C228 266 254 258 272 234 L280 262 C258 290 230 298 200 298 C170 298 142 290 120 262 Z'),
+    };
+    // Where each mask meets the air (an ellipse), and the gaps where unfiltered air sneaks in.
+    const BARRIER = {
+      none: { cx: 200, cy: 182, rx: 24, ry: 28, gaps: [] },
+      cloth: { cx: 200, cy: 188, rx: 66, ry: 50, gaps: [[142, 152], [258, 152], [140, 222], [260, 222], [176, 142], [224, 142]] },
+      surgical: { cx: 200, cy: 188, rx: 66, ry: 50, gaps: [[142, 152], [258, 152], [140, 222], [260, 222], [176, 142], [224, 142]] },
+      ffp: { cx: 200, cy: 188, rx: 60, ry: 63, gaps: [[176, 131], [224, 131], [146, 198], [254, 198], [200, 249]] },
+      ffpear: { cx: 200, cy: 188, rx: 60, ry: 63, gaps: [[172, 132], [228, 132], [146, 170], [254, 170], [146, 212], [254, 212], [200, 249]] },
+      ffp3: { cx: 200, cy: 188, rx: 60, ry: 63, gaps: [[176, 131], [224, 131], [146, 198], [254, 198], [200, 249]] },
+      half: { cx: 200, cy: 194, rx: 82, ry: 50, gaps: [[186, 127], [214, 127], [168, 232], [232, 232]] },
+      papr: { cx: 200, cy: 190, rx: 48, ry: 56, gaps: [[186, 127], [214, 127], [168, 232], [232, 232]] },
+      full: { cx: 200, cy: 150, rx: 78, ry: 116, gaps: [[142, 70], [258, 70], [136, 200], [264, 200]] },
+      hood: { cx: 200, cy: 160, rx: 84, ry: 110, gaps: [[134, 262], [266, 262]] },
+    };
+    const INHALE = { x: 200, y: 184 };
+    const bar = () => BARRIER[mask ? mask.style : 'none'];
+    const inside = (q, b) => ((q.x - b.cx) / b.rx) ** 2 + ((q.y - b.cy) / b.ry) ** 2 <= 1;
+
+    function resize() {
+      const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+      cv.width = Math.max(1, Math.round(r.width * dpr)); cv.height = Math.max(1, Math.round(r.height * dpr));
+      scale = Math.min(cv.width / 400, cv.height / 300);
+      ox = (cv.width - 400 * scale) / 2; oy = (cv.height - 300 * scale) / 2;
+    }
+
+    function spawn(x) {
+      const left = x !== undefined ? x < 200 : Math.random() < .5, big = Math.random() < .18;
+      parts.push({ x: x ?? (left ? -6 : 406), y: 40 + Math.random() * 250, dir: left ? 1 : -1, tn: (Math.random() * 2 - 1) * .7,
+        v: 36 + Math.random() * 30, r: big ? 2.6 + Math.random() * 1.4 : 1 + Math.random() * 1.2, s: 'fly', a: 1, wob: Math.random() * 6.3 });
+    }
+
+    function decide(q, b) {
+      if (mask.style === 'none') { q.s = 'edge2'; return; }
+      const total = 1 / mask.pf, f = Math.min(total, mask.filter), u = Math.random();
+      if (u < f) q.s = 'filter';
+      else if (u < total && b.gaps.length) {
+        q.s = 'edge';
+        const g = b.gaps.reduce((best, p) => Math.hypot(p[0] - q.x, p[1] - q.y) < Math.hypot(best[0] - q.x, best[1] - q.y) ? p : best);
+        q.wp = { x: g[0], y: g[1] };
+      } else q.s = 'stop';
+    }
+
+    const line = (pts, w, color, alpha = 1, curve) => {
+      ctx.beginPath(); ctx.moveTo(pts[0], pts[1]);
+      if (curve) ctx.quadraticCurveTo(pts[2], pts[3], pts[4], pts[5]); else ctx.lineTo(pts[2], pts[3]);
+      ctx.lineWidth = w; ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.stroke(); ctx.globalAlpha = 1;
+    };
+    const both = (fn) => { fn(1); ctx.save(); ctx.translate(400, 0); ctx.scale(-1, 1); fn(-1); ctx.restore(); };
+    function cartridge(x, y, r) {
+      ctx.fillStyle = C['cart']; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = C['rubber']; ctx.lineWidth = 3.5; ctx.stroke();
+      ctx.strokeStyle = C['surface']; ctx.globalAlpha = .5; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, r * .62, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.fillStyle = C['rubber']; ctx.beginPath(); ctx.arc(x, y, r * .2, 0, Math.PI * 2); ctx.fill();
+    }
+    function valve(x, y, r, fill) {
+      ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = C['rubber']; ctx.lineWidth = 2; ctx.stroke();
+      ctx.lineWidth = 1.2; for (let k = -r * .5; k <= r * .5; k += r * .25) { ctx.beginPath(); ctx.moveTo(x - r * .55, y + k); ctx.lineTo(x + r * .55, y + k); ctx.stroke(); }
+    }
+
+    function drawFace() {
+      ctx.fillStyle = C['face-2']; ctx.fill(F.neck);
+      ctx.fillStyle = C['face']; ctx.fill(F.head);
+      ctx.fillStyle = C['face-2']; ctx.fill(F.hair);
+      [[120, 142], [280, 142]].forEach(([x, y]) => { ctx.beginPath(); ctx.ellipse(x, y, 9, 20, 0, 0, Math.PI * 2); ctx.fillStyle = C['face']; ctx.fill(); });
+      ctx.fillStyle = C['ink-soft']; ctx.globalAlpha = .55;
+      [[172, 122], [228, 122]].forEach(([x, y]) => { ctx.beginPath(); ctx.ellipse(x, y, 7, 3.4, 0, 0, Math.PI * 2); ctx.fill(); });
+      ctx.globalAlpha = 1;
+      line([160, 108, 172, 102, 184, 107], 1.6, C['ink-soft'], .35, true); line([216, 107, 228, 102, 240, 108], 1.6, C['ink-soft'], .35, true);
+      line([198, 130, 192, 160, 200, 164], 1.4, C['ink-soft'], .35, true);
+      line([186, 198, 200, 203, 214, 198], 1.6, C['ink-soft'], .4, true);
+    }
+
+    function drawMask() {
+      if (!mask || mask.style === 'none') return;
+      const s = mask.style;
+      ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      if (s === 'cloth' || s === 'surgical') {
+        // ear loops
+        both(() => { line([142, 154, 126, 128, 120, 132], 1.6, C['ink-soft'], .55, true); line([140, 220, 124, 178, 120, 152], 1.6, C['ink-soft'], .55, true); });
+        ctx.fillStyle = s === 'cloth' ? C['face-2'] : C['accent-soft']; ctx.fill(S.flat);
+        if (s === 'cloth') {
+          ctx.save(); ctx.clip(S.flat); ctx.strokeStyle = C['particle']; ctx.globalAlpha = .35; ctx.lineWidth = 1;
+          for (let k = 80; k < 340; k += 7) { ctx.beginPath(); ctx.moveTo(k, 130); ctx.lineTo(k - 60, 240); ctx.stroke(); }
+          ctx.restore();
+        } else {
+          [168, 186, 204].forEach((y) => line([140, y, 200, y + 3, 260, y], 1, C['accent'], .5, true));
+          line([166, 147, 200, 142, 234, 147], 3, C['ink-soft'], .6, true);
+        }
+        ctx.strokeStyle = s === 'cloth' ? C['particle'] : C['accent']; ctx.lineWidth = 1.6; ctx.setLineDash([5, 4]); ctx.stroke(S.flat); ctx.setLineDash([]);
+      } else if (s === 'ffp') {
+        // FFP2 / N95: white moulded cup (3M 8810 / Aura style), blue head straps, nose clip, centre seam, sealed edge, no valve
+        both(() => { line([148, 160, 134, 132, 124, 114], 2.4, C['strap2'], .9, true); line([152, 216, 138, 224, 128, 214], 2.4, C['strap2'], .9, true); });
+        const g = ctx.createRadialGradient(194, 176, 8, 200, 190, 70);
+        g.addColorStop(0, C['surface']); g.addColorStop(1, C['face-2']);
+        ctx.fillStyle = g; ctx.fill(S.cup);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 3; ctx.stroke(S.cup);
+        line([200, 134, 204, 190, 200, 244], 1, C['ink-soft'], .35, true);
+        line([180, 135, 200, 129, 220, 135], 3.5, C['ink-soft'], .75, true);
+      } else if (s === 'ffpear') {
+        // FFP2 / KN95 with ear loops: the loops pull the edges away from the cheeks, leaving gaps
+        both(() => { line([146, 158, 120, 126, 116, 140], 1.8, C['ink-soft'], .7, true); line([150, 214, 122, 196, 118, 150], 1.8, C['ink-soft'], .7, true); });
+        ctx.fillStyle = C['surface']; ctx.fill(S.cup);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 2.4; ctx.stroke(S.cup);
+        line([200, 134, 204, 190, 200, 244], 1, C['ink-soft'], .35, true);
+        line([180, 135, 200, 129, 220, 135], 3, C['ink-soft'], .6, true);
+        // gaps where the edge lifts off the face
+        ctx.strokeStyle = C['edge']; ctx.lineWidth = 2.4; ctx.setLineDash([3, 4]);
+        both(() => { ctx.beginPath(); ctx.moveTo(147, 158); ctx.quadraticCurveTo(140, 184, 148, 214); ctx.stroke(); ctx.beginPath(); ctx.moveTo(174, 132); ctx.quadraticCurveTo(160, 138, 152, 150); ctx.stroke(); });
+        ctx.setLineDash([]);
+      } else if (s === 'ffp3') {
+        // FFP3: three-panel fold-flat respirator (3M Aura 9332 style), red head straps, wide nose foam, big front valve
+        both(() => { line([146, 150, 132, 124, 124, 108], 3, C['strap3'], .95, true); line([148, 214, 136, 226, 128, 218], 3, C['strap3'], .95, true); });
+        ctx.fillStyle = C['surface']; ctx.fill(S.flat3);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 3; ctx.stroke(S.flat3);
+        ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.moveTo(150, 166); ctx.quadraticCurveTo(200, 180, 250, 166); ctx.lineTo(252, 168); ctx.quadraticCurveTo(200, 184, 148, 168); ctx.fill();
+        line([148, 167, 200, 182, 252, 167], 1.4, C['ink-soft'], .45, true);
+        line([150, 214, 200, 226, 250, 214], 1.4, C['ink-soft'], .45, true);
+        ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.roundRect(168, 136, 64, 8, 4); ctx.fill();
+        // exhalation valve
+        ctx.fillStyle = C['rubber']; ctx.beginPath(); ctx.roundRect(182, 188, 36, 30, 9); ctx.fill();
+        ctx.strokeStyle = C['face-2']; ctx.lineWidth = 1.6;
+        for (let y = 194; y <= 212; y += 4.5) { ctx.beginPath(); ctx.moveTo(188, y); ctx.lineTo(212, y); ctx.stroke(); }
+      } else if (s === 'half' || s === 'papr') {
+        // reusable half mask (3M 6000 / 7500, JSP Force 8): crown cradle, nose cone, centre valve, two side cartridges
+        ctx.beginPath(); ctx.moveTo(150, 46); ctx.quadraticCurveTo(200, 18, 250, 46); ctx.lineWidth = 8; ctx.strokeStyle = C['rubber']; ctx.globalAlpha = .8; ctx.stroke(); ctx.globalAlpha = 1;
+        both(() => { line([168, 146, 146, 100, 150, 48], 3.5, C['rubber'], .8, true); line([150, 214, 132, 226, 124, 214], 3.5, C['rubber'], .8, true); });
+        ctx.fillStyle = C['rubber']; ctx.fill(S.half);
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 2; ctx.stroke(S.half);
+        line([200, 132, 200, 150, 200, 186], 1, C['surface'], .3, true);
+        if (s === 'half') {
+          both(() => { ctx.fillStyle = C['rubber']; ctx.beginPath(); ctx.roundRect(160, 194, 18, 14, 4); ctx.fill(); cartridge(150, 202, 26); });
+          valve(200, 210, 15, C['face-2']);
+        } else {
+          valve(200, 172, 11, C['face-2']);
+          ctx.fillStyle = C['face-2']; ctx.beginPath(); ctx.arc(200, 222, 12, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(200, 232); ctx.bezierCurveTo(198, 260, 214, 280, 236, 300); ctx.lineWidth = 11; ctx.strokeStyle = C['rubber']; ctx.stroke();
+          ctx.strokeStyle = C['face-2']; ctx.globalAlpha = .7; ctx.lineWidth = 1.2;
+          for (let k = .06; k < 1; k += .09) { const u = 1 - k, x = u*u*u*200 + 3*u*u*k*198 + 3*u*k*k*214 + k*k*k*236, y = u*u*u*232 + 3*u*u*k*260 + 3*u*k*k*280 + k*k*k*300; ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.stroke(); }
+          ctx.globalAlpha = 1;
+        }
+      } else if (s === 'full') {
+        // full-face mask (3M 6800, JSP Force 10): spider harness, rubber frame, clear visor, inner nose cup, chin valve, two cartridges
+        [[128, 98, 200, -2, 272, 98], [134, 150, 200, 40, 266, 150]].forEach((pts) => line(pts, 4, C['rubber'], .8, true));
+        both(() => line([130, 200, 120, 210, 118, 226], 4, C['rubber'], .8, true));
+        ctx.fillStyle = C['rubber']; ctx.fill(S.full);
+        ctx.save(); ctx.clip(S.fullLens); drawFace(); ctx.restore();
+        ctx.fillStyle = C['accent-soft']; ctx.globalAlpha = .4; ctx.fill(S.fullLens); ctx.globalAlpha = 1;
+        ctx.fillStyle = C['rubber']; ctx.globalAlpha = .45; ctx.fill(S.nosecup); ctx.globalAlpha = 1;
+        ctx.strokeStyle = C['rubber']; ctx.lineWidth = 2; ctx.stroke(S.fullLens);
+        line([160, 70, 146, 110, 150, 160], 3, C['surface'], .7, true);
+        both(() => cartridge(156, 240, 19));
+        valve(200, 250, 13, C['face-2']);
+      } else if (s === 'hood') {
+        // powered helmet (3M Versaflo): hard shell, brim, clear face shield, fabric face seal, hose to the belt fan
+        ctx.beginPath(); ctx.moveTo(290, 150); ctx.bezierCurveTo(344, 180, 330, 250, 372, 300); ctx.lineWidth = 11; ctx.strokeStyle = C['rubber']; ctx.stroke();
+        ctx.fillStyle = C['accent-soft']; ctx.fill(S.seal);
+        ctx.fillStyle = C['accent-soft']; ctx.globalAlpha = .35; ctx.fill(S.shield); ctx.globalAlpha = 1;
+        ctx.strokeStyle = C['accent']; ctx.lineWidth = 2; ctx.stroke(S.shield);
+        line([140, 132, 132, 180, 140, 226], 3, C['surface'], .7, true);
+        ctx.fillStyle = C['surface']; ctx.fill(S.helmet);
+        ctx.strokeStyle = C['ink-soft']; ctx.globalAlpha = .55; ctx.lineWidth = 1.5; ctx.stroke(S.helmet); ctx.globalAlpha = 1;
+        line([150, 40, 200, 26, 250, 40], 1.2, C['ink-soft'], .35, true);
+        ctx.fillStyle = C['rubber']; ctx.beginPath(); ctx.roundRect(112, 110, 176, 12, 6); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function moveTo(q, t, sp, dt) {
+      const dx = t.x - q.x, dy = t.y - q.y, d = Math.hypot(dx, dy) || 1;
+      q.x += dx / d * sp * dt; q.y += dy / d * sp * dt; return d;
+    }
+
+    function frame(now) {
+      const dt = Math.min(.05, (now - last) / 1000 || 0); last = now; clock += dt;
+      const breath = .55 + .75 * Math.max(0, Math.sin(clock * Math.PI / 2)); // inhale pulls particles in, in waves
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.setTransform(scale, 0, 0, scale, ox, oy);
+      drawFace();
+
+      if (!reduce) { spawnAcc += dt * 32 * breath; while (spawnAcc > 1) { spawn(); spawnAcc--; } }
+      const b = bar(), inner = [], outer = [];
+      for (const q of parts) {
+        if (!reduce) {
+          if (q.s === 'fly') {
+            q.x += q.dir * q.v * breath * dt; q.wob += dt * 2;
+            const pull = .8 + 3 * Math.max(0, 1 - Math.abs(q.x - 200) / 200);
+            q.y += ((b.cy + q.tn * b.ry - q.y) * pull + Math.sin(q.wob) * 6) * dt;
+            if (inside(q, b)) decide(q, b);
+          } else if (q.s === 'stop') { q.a -= dt * .7; }
+          else if (q.s === 'filter') { if (moveTo(q, INHALE, 26 * breath + 8, dt) < 4) q.a -= dt * 3; }
+          else if (q.s === 'edge') { if (moveTo(q, q.wp, 50 * breath + 10, dt) < 4) q.s = 'edge2'; }
+          else if (q.s === 'edge2') { if (moveTo(q, INHALE, 36 * breath + 10, dt) < 4) q.a -= dt * 3; }
+        }
+        (q.s === 'filter' || q.s === 'edge2' ? inner : outer).push(q);
+      }
+      drawMask();
+      const dot = (q) => {
+        ctx.globalAlpha = Math.max(0, Math.min(1, q.a));
+        ctx.fillStyle = q.s === 'filter' ? C['filter'] : q.s === 'edge' || q.s === 'edge2' ? C['edge'] : C['particle'];
+        ctx.beginPath(); ctx.arc(q.x, q.y, q.s === 'fly' || q.s === 'stop' ? q.r : q.r + .7, 0, Math.PI * 2); ctx.fill();
+      };
+      outer.forEach(dot); inner.forEach(dot);
+      ctx.globalAlpha = 1;
+      parts = parts.filter((q) => q.a > 0 && q.x > -20 && q.x < 420);
+      if (!reduce) requestAnimationFrame(frame);
+    }
+
+    function still() {
+      // Reduced motion: one settled frame showing where particles ended up.
+      parts = []; const b = bar();
+      for (let i = 0; i < 90; i++) {
+        const left = Math.random() < .5, y = 50 + Math.random() * 230;
+        const q = { x: left ? 10 + Math.random() * (b.cx - b.rx - 20) : 390 - Math.random() * (400 - b.cx - b.rx - 20), y, r: 1 + Math.random() * 2, s: 'fly', a: 1 };
+        const total = mask.style === 'none' ? 1 : 1 / mask.pf, u = Math.random();
+        if (mask.style !== 'none' && u < Math.min(total, mask.filter)) Object.assign(q, { s: 'filter', x: 192 + Math.random() * 16, y: 176 + Math.random() * 16 });
+        else if (u < total) Object.assign(q, { s: 'edge2', x: 190 + Math.random() * 20, y: 170 + Math.random() * 28 });
+        parts.push(q);
+      }
+      frame(performance.now());
+    }
+
+    readColors(); resize();
+    new ResizeObserver(() => { resize(); if (reduce && mask) still(); }).observe(cv);
+    const recolor = () => { readColors(); if (reduce && mask) still(); };
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+    new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    let started = false;
+    return {
+      setMask(m) {
+        mask = m;
+        const b = bar();
+        // particles already past the new mask's edge start over outside it
+        parts.forEach((q) => { if (q.s === 'fly' && inside(q, b)) q.x = q.dir > 0 ? b.cx - b.rx - 4 : b.cx + b.rx + 4; });
+        if (reduce) { still(); return; }
+        if (!started) { started = true; for (let i = 0; i < 50; i++) spawn(Math.random() < .5 ? Math.random() * 110 : 290 + Math.random() * 110); last = performance.now(); requestAnimationFrame(frame); }
+      },
+    };
+  }
+
+  return { MASKS, NONE, money, split, createScene };
+})();
