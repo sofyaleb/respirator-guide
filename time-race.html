@@ -7,7 +7,7 @@
 <meta name="description" content="Two faces breathe the same air for a whole day, one with no mask and one with yours. Watch what each takes in.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="time-proto.css">
+<link rel="stylesheet" href="time-proto.css?v=2">
 <style>
   /* Layout: controls on top, then two lanes side by side (stacked on phones): a face with particles, then a jar that fills as the day goes on. */
   .race { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
@@ -54,7 +54,7 @@
     <div class="timebar">
       <div class="now" id="now" aria-live="off">07:00</div>
       <button type="button" class="btn play" id="play">▶ Play</button>
-      <div class="speed"><span>A whole day in</span><div class="chips" id="speed" role="group" aria-label="Playback speed"></div></div>
+      <div class="speed">Plays a whole day in 30 seconds</div>
     </div>
     <div class="ctl-row">
       <input type="range" id="slider" aria-label="Time of day">
@@ -89,7 +89,7 @@
 </div>
 
 <script src="shared.js?v=20261029"></script>
-<script src="time-proto.js"></script>
+<script src="time-proto.js?v=2"></script>
 <script>
 (() => {
   const { NONE } = window.RG;
@@ -148,7 +148,7 @@
 
   maskChips($('masks'), mask.id, setMask);
   player({
-    start: START, end: END, playBtn: $('play'), slider: $('slider'), speedEl: $('speed'), seconds: 120,
+    start: START, end: END, playBtn: $('play'), slider: $('slider'),
     onTime: (now, dt) => {
       t = now;
       // while it plays the dose adds up at the current mask's rate, so switching masks mid-day bends the line;

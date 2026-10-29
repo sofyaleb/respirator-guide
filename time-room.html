@@ -7,7 +7,7 @@
 <meta name="description" content="An office for a working day with one ill person in it. Particles spread through the room; see how much each person breathes in.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="time-proto.css">
+<link rel="stylesheet" href="time-proto.css?v=2">
 <style>
   /* Layout: controls, then the room seen from above beside a list of what each person has breathed in (stacked on phones). */
   .roomgrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; align-items: start; }
@@ -61,7 +61,7 @@
     <div class="timebar">
       <div class="now" id="now">09:00</div>
       <button type="button" class="btn play" id="play">▶ Play</button>
-      <div class="speed"><span>A working day in</span><div class="chips" id="speed" role="group" aria-label="Playback speed"></div></div>
+      <div class="speed">Plays a working day in 30 seconds</div>
     </div>
     <div class="ctl-row">
       <input type="range" id="slider" aria-label="Time of day">
@@ -84,7 +84,7 @@
 </div>
 
 <script src="shared.js?v=20261029"></script>
-<script src="time-proto.js"></script>
+<script src="time-proto.js?v=2"></script>
 <script>
 (() => {
   const { ORDER, byId, SHORT, pfText, clock, chips, maskChips, player, switcher } = window.TP;
@@ -198,7 +198,7 @@
   let t = START;
   const replay = () => { parts = []; people.forEach((p) => { p.raw = 0; }); for (let m = START; m < t; m++) step(1); };
   player({
-    start: START, end: END, playBtn: $('play'), slider: $('slider'), speedEl: $('speed'), seconds: 120,
+    start: START, end: END, playBtn: $('play'), slider: $('slider'),
     // a jump replays the day minute by minute up to the new time, so the room and the totals stay consistent
     onTime: (now, dt) => { t = now; if (dt === null) replay(); else if (dt > 0) step(dt); $('now').textContent = clock(t); list(); draw(); },
   });

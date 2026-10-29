@@ -7,7 +7,7 @@
 <meta name="description" content="Particles rain down on every mask for a whole day. The ones that get through pile up underneath.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="time-proto.css">
+<link rel="stylesheet" href="time-proto.css?v=2">
 <style>
   /* Layout: controls, then one wide canvas with a column per mask (rain on top, mask in the middle, heap at the bottom), labels under it, and a readout for the mask you picked. */
   .heap-card { margin-top: 1rem; display: grid; gap: .6rem; }
@@ -45,7 +45,7 @@
     <div class="timebar">
       <div class="now" id="now">07:00</div>
       <button type="button" class="btn play" id="play">▶ Play</button>
-      <div class="speed"><span>A whole day in</span><div class="chips" id="speed" role="group" aria-label="Playback speed"></div></div>
+      <div class="speed">Plays a whole day in 30 seconds</div>
     </div>
     <div class="ctl-row">
       <input type="range" id="slider" aria-label="Time of day">
@@ -72,7 +72,7 @@
 </div>
 
 <script src="shared.js?v=20261029"></script>
-<script src="time-proto.js"></script>
+<script src="time-proto.js?v=2"></script>
 <script>
 (() => {
   const { ORDER, byId, SHORT, pfText, dur, clock, player, switcher } = window.TP;
@@ -204,7 +204,7 @@
   new ResizeObserver(layout).observe(cv);
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); if (reduce) render(); });
   player({
-    start: START, end: END, playBtn: $('play'), slider: $('slider'), speedEl: $('speed'), seconds: 120,
+    start: START, end: END, playBtn: $('play'), slider: $('slider'),
     onTime: (now, dt) => { t = now; advance(dt); readout(); if (reduce) render(); },
   });
   pick(sel);

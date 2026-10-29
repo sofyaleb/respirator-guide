@@ -29,8 +29,7 @@ window.TP = (() => {
 
   // Runs the clock from start to end (minutes since midnight). onTime(t, dt) gets the time and the clock minutes
   // since the last call; dt is null after a jump (slider, replay), so pages can reset rather than add up.
-  const SPEEDS = [['30', '30 s'], ['120', '2 min'], ['600', '10 min']];
-  function player({ start, end, onTime, playBtn, slider, speedEl, seconds = 120 }) {
+  function player({ start, end, onTime, playBtn, slider, seconds = 30 }) {
     let t = start, playing = false, raf = 0, last = 0;
     const label = () => { playBtn.textContent = playing ? '❚❚ Pause' : t >= end ? '↺ Replay' : '▶ Play'; };
     const seek = (v, dt = null) => {
@@ -53,7 +52,6 @@ window.TP = (() => {
       Object.assign(slider, { min: start, max: end, step: 1 });
       slider.addEventListener('input', () => { pause(); seek(+slider.value); });
     }
-    if (speedEl) chips(speedEl, SPEEDS, String(seconds), (v) => { seconds = +v; });
     seek(start); label();
     return { seek, play, pause, get t() { return t; } };
   }
