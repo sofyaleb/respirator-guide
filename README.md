@@ -1,4 +1,4 @@
-# Respirator Guide
+# Respiratory Guide v1
 
 A simple mask picker, an explainer on how protection factors work, and a full comparison.
 

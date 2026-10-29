@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Time Page Options</title>
+<meta name="description" content="Four draft ways to show how a mask slows the clock: a race, a heap, a crowded room and a day you scroll through.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="time-proto.css">
+<style>
+  /* Layout: a short intro, then one card per draft in a grid. */
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+  @media (max-width: 700px) { .opts { grid-template-columns: 1fr; } }
+  .opt { display: grid; gap: .5rem; align-content: start; color: inherit; text-decoration: none; border: 1px solid transparent; transition: border-color .2s, transform .2s; }
+  .opt:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .opt .num { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .opt h2 { margin: 0; font-size: 1.3rem; font-weight: 500; letter-spacing: -.01em; }
+  .opt p { margin: 0; color: var(--ink-soft); font-size: .92rem; }
+  .opt .go { margin-top: .4rem; font-size: .85rem; font-weight: 600; color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <span class="brand">Respiratory guide v1</span>
+    <span class="links"><a href="./">Mask picker</a><a href="explain.html">How protection works</a><a href="time.html">Time adds up</a><a href="details.html">Details</a></span>
+  </nav>
+
+  <header>
+    <h1>Four ways to show that a mask slows the clock</h1>
+    <p class="lede">Drafts for the <a href="time.html" style="color:var(--ink)">Time adds up</a> page. Each one shows the same idea: the longer you breathe the same air, the more you take in, and a mask's protection factor slows that down. Pick your mask in each one and compare.</p>
+  </header>
+
+  <div class="opts">
+    <a class="card opt" href="time-race.html">
+      <span class="num">Option 1</span>
+      <h2>The race</h2>
+      <p>Two faces breathe the same air from 7 am to 11 pm, one with no mask and one with yours. A jar under each fills up as the day goes on.</p>
+      <span class="go">Open the race →</span>
+    </a>
+    <a class="card opt" href="time-heap.html">
+      <span class="num">Option 2</span>
+      <h2>The heap</h2>
+      <p>Particles rain down on every mask at once. The mask catches most of them; what gets through piles up underneath, all day.</p>
+      <span class="go">Open the heap →</span>
+    </a>
+    <a class="card opt" href="time-room.html">
+      <span class="num">Option 3</span>
+      <h2>The crowded room</h2>
+      <p>A working day in an office with one ill person. Move yourself around, open the windows and change masks to see what each person breathes in.</p>
+      <span class="go">Open the room →</span>
+    </a>
+    <a class="card opt" href="time-scroll.html">
+      <span class="num">Option 4</span>
+      <h2>Scroll through a day</h2>
+      <p>Scroll from breakfast to bed through a train, an office, a café and a pub, and watch the time in shared air add up.</p>
+      <span class="go">Open the day →</span>
+    </a>
+  </div>
+
+  <p class="foot">These are drafts for feedback. Protection factors are the same UK HSE and US OSHA ratings the mask picker uses. <a href="time.html">Back to the time page</a>.</p>
+</div>
+</body>
+</html>

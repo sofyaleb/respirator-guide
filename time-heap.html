@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Particle Heap</title>
+<meta name="description" content="Particles rain down on every mask for a whole day. The ones that get through pile up underneath.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="time-proto.css">
+<style>
+  /* Layout: controls, then one wide canvas with a column per mask (rain on top, mask in the middle, heap at the bottom), labels under it, and a readout for the mask you picked. */
+  .heap-card { margin-top: 1rem; display: grid; gap: .6rem; }
+  .heap { display: block; width: 100%; height: 420px; cursor: pointer; }
+  @media (max-width: 700px) { .heap { height: 380px; } }
+  .bins { display: grid; gap: 4px; padding: 0 4px; }
+  .bins button { font: inherit; font-size: .72rem; line-height: 1.2; padding: .35rem .1rem; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--ink-soft); cursor: pointer; display: grid; gap: .1rem; justify-items: center; text-align: center; min-width: 0; overflow-wrap: anywhere; }
+  .bins button b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .bins button:hover { border-color: var(--line); }
+  .bins button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+  @media (max-width: 700px) { .bins button { font-size: .6rem; } }
+  .legend { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .8rem; color: var(--ink-soft); }
+  .legend i { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; vertical-align: -1px; }
+  .readout { margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+  .readout div { display: grid; gap: .1rem; }
+  .readout b { font-size: 1.6rem; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .readout .you b { color: var(--accent); }
+  .readout span { font-size: .85rem; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <span class="brand">Respiratory guide v1</span>
+    <span class="links"><a href="./">Mask picker</a><a href="explain.html">How protection works</a><a href="time.html">Time adds up</a><a href="details.html">Details</a></span>
+  </nav>
+  <div class="switch" id="switch"></div>
+
+  <header>
+    <h1>What piles up over a day</h1>
+    <p class="lede">The same particles rain down on every mask from 7 in the morning to 11 at night. The mask catches most of them; the ones that get through pile up underneath. Tap a pile to pick your mask.</p>
+  </header>
+
+  <div class="controls card">
+    <div class="timebar">
+      <div class="now" id="now">07:00</div>
+      <button type="button" class="btn play" id="play">▶ Play</button>
+      <div class="speed"><span>A whole day in</span><div class="chips" id="speed" role="group" aria-label="Playback speed"></div></div>
+    </div>
+    <div class="ctl-row">
+      <input type="range" id="slider" aria-label="Time of day">
+      <div class="ends"><span>07:00</span><span>11:00</span><span>15:00</span><span>19:00</span><span>23:00</span></div>
+    </div>
+  </div>
+
+  <div class="card heap-card">
+    <canvas class="heap" id="heap" role="img" aria-label="A pile of particles under each mask, growing through the day"></canvas>
+    <div class="bins" id="bins" role="group" aria-label="Pick your mask"></div>
+    <div class="legend">
+      <span><i style="background:var(--particle)"></i>Particles in the air</span>
+      <span><i style="background:var(--stop)"></i>Caught by the mask</span>
+      <span><i style="background:var(--edge)"></i>Got through · each grain is 3 minutes of breathing with no mask</span>
+    </div>
+  </div>
+
+  <div class="readout" aria-live="polite">
+    <div><span>No mask, so far</span><b id="r-none">0 min</b><span>of air breathed in</span></div>
+    <div class="you"><span id="r-name">Disposable respirator · 10×, so far</span><b id="r-you">0 min</b><span>the same as this long with no mask</span></div>
+  </div>
+
+  <p class="foot">Protection factors are the same UK HSE and US OSHA ratings the mask picker uses, and assume the mask fits and is worn all day; cloth, face mask and ear-loop figures are rough estimates. The heaps are exact to the nearest grain. <a href="time.html">Back to the time page</a>.</p>
+</div>
+
+<script src="shared.js?v=20261029"></script>
+<script src="time-proto.js"></script>
+<script>
+(() => {
+  const { ORDER, byId, SHORT, pfText, dur, clock, player, switcher } = window.TP;
+  const $ = (id) => document.getElementById(id);
+  switcher($('switch'));
+
+  const START = 7 * 60, END = 23 * 60, GRAIN = 3; // each grain that gets through is 3 minutes of breathing with no mask
+  const cv = $('heap'), ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let C = {};
+  const readColors = () => { C = {}; ['particle', 'stop', 'edge', 'accent', 'accent-soft', 'line', 'dot', 'ink-soft', 'surface', 'bg'].forEach((k) => { C[k] = css('--' + k); }); };
+
+  // one bin per mask: shown = grains on the heap, sent = rain drops sent so far, acc = share of a grain owed
+  const bins = ORDER.map((m) => ({ m, shown: 0, sent: 0, acc: 0, drops: [], caught: [] }));
+  let sel = byId('ffp2'), t = START;
+
+  // geometry, in CSS pixels
+  let W = 0, H = 0, gap = 4, bw = 0, g = 4, cols = 1;
+  const filterY = () => Math.round(H * .3), floorY = () => H - 2;
+  const binX = (k) => gap + k * (bw + gap);
+  function layout() {
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    gap = W < 600 ? 4 : 8; bw = (W - gap * (bins.length + 1)) / bins.length;
+    // grain size: the no-mask heap for a full day has to fit between the mask line and the floor
+    const total = (END - START) / GRAIN, room = floorY() - filterY() - 24;
+    g = Math.min(7, Math.sqrt(room * bw / total)); cols = Math.max(1, Math.floor(bw / g)); g = bw / cols;
+    $('bins').style.gridTemplateColumns = `repeat(${bins.length}, 1fr)`;
+    $('bins').style.paddingInline = `${gap}px`; $('bins').style.gap = `${gap}px`;
+    if (reduce) render();
+  }
+  const heapTop = (b, n = b.shown) => floorY() - Math.ceil(n / cols) * g;
+
+  // the clock moved: send the rain owed to every bin. A jump resets the heaps to the exact count.
+  function advance(dt) {
+    const sent = Math.floor((t - START) / GRAIN);
+    bins.forEach((b, k) => {
+      if (dt === null) {
+        const exact = sent / b.m.pf;
+        b.shown = Math.floor(exact); b.acc = exact - b.shown; b.sent = sent; b.drops = []; b.caught = []; return;
+      }
+      while (b.sent < sent) {
+        b.sent++; b.acc += 1 / b.m.pf;
+        const pass = b.acc >= 1 - 1e-9; if (pass) b.acc -= 1;
+        if (reduce) { if (pass) b.shown++; continue; }
+        b.drops.push({ x: binX(k) + 3 + Math.random() * (bw - 6), y: -Math.random() * 30, v: 120 + Math.random() * 80, pass });
+      }
+    });
+  }
+
+  let last = 0;
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
+    const fy = filterY();
+    bins.forEach((b) => {
+      for (const d of b.drops) {
+        d.v += 260 * dt; d.y += d.v * dt;
+        if (!d.pass && b.m.pf > 1 && d.y >= fy - 3) { d.dead = true; b.caught.push({ x: d.x, y: fy - 4 - Math.random() * 3, a: 1 }); }
+        else if (d.pass && d.y >= heapTop(b, b.shown + 1) + g / 2) { d.dead = true; b.shown++; }
+      }
+      b.drops = b.drops.filter((d) => !d.dead);
+      b.caught.forEach((c) => { c.a -= dt * .9; });
+      b.caught = b.caught.filter((c) => c.a > 0);
+    });
+    render();
+    if (!reduce) requestAnimationFrame(frame);
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    const fy = filterY();
+    bins.forEach((b, k) => {
+      const x = binX(k), on = b.m === sel;
+      // column
+      ctx.fillStyle = on ? C['accent-soft'] : C['bg']; ctx.globalAlpha = on ? .55 : 1;
+      ctx.beginPath(); ctx.roundRect(x, 0, bw, H, 8); ctx.fill(); ctx.globalAlpha = 1;
+      if (on) { ctx.strokeStyle = C['accent']; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x + .75, .75, bw - 1.5, H - 1.5, 8); ctx.stroke(); }
+      // the mask: thicker for stronger masks
+      if (b.m.pf > 1) {
+        const th = 3 + Math.min(9, Math.log2(b.m.pf) * 1.6);
+        ctx.fillStyle = C['ink-soft']; ctx.globalAlpha = .55; ctx.fillRect(x + 2, fy - th / 2, bw - 4, th); ctx.globalAlpha = 1;
+      }
+      // caught particles flash green on the mask, then fade
+      b.caught.forEach((c) => { ctx.globalAlpha = c.a; ctx.fillStyle = C['stop']; ctx.beginPath(); ctx.arc(c.x, c.y, 2, 0, Math.PI * 2); ctx.fill(); });
+      ctx.globalAlpha = 1;
+      // falling particles: grey above the mask, red once they're through
+      b.drops.forEach((d) => {
+        ctx.fillStyle = d.y > fy ? C['edge'] : C['particle'];
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.y > fy ? Math.max(1.6, g * .42) : 1.8, 0, Math.PI * 2); ctx.fill();
+      });
+      // the heap
+      ctx.fillStyle = C['edge'];
+      for (let i = 0; i < b.shown; i++) {
+        const cx = x + (i % cols) * g + g / 2, cy = floorY() - Math.floor(i / cols) * g - g / 2;
+        ctx.beginPath(); ctx.arc(cx, cy, g * .42, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+  }
+
+  // labels under the columns double as the mask picker
+  const pick = (m) => {
+    sel = m;
+    $('bins').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === m.id)));
+    readout(); if (reduce) render();
+  };
+  bins.forEach((b) => {
+    const btn = document.createElement('button'); btn.type = 'button'; btn.dataset.id = b.m.id;
+    const n = document.createElement('span'); n.textContent = SHORT[b.m.id];
+    const p = document.createElement('b'); p.textContent = pfText(b.m);
+    btn.append(n, p); btn.addEventListener('click', () => pick(b.m));
+    $('bins').appendChild(btn);
+  });
+  cv.addEventListener('click', (e) => {
+    const r = cv.getBoundingClientRect(), k = Math.floor((e.clientX - r.left - gap / 2) / (bw + gap));
+    if (bins[k]) pick(bins[k].m);
+  });
+
+  function readout() {
+    const open = t - START;
+    $('now').textContent = clock(t);
+    $('r-none').textContent = dur(open);
+    $('r-name').textContent = `${sel.name} · ${pfText(sel)}, so far`;
+    $('r-you').textContent = sel.pf === 1 ? dur(open) : `like ${dur(open / sel.pf)}`;
+  }
+
+  readColors(); layout();
+  new ResizeObserver(layout).observe(cv);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); if (reduce) render(); });
+  player({
+    start: START, end: END, playBtn: $('play'), slider: $('slider'), speedEl: $('speed'), seconds: 120,
+    onTime: (now, dt) => { t = now; advance(dt); readout(); if (reduce) render(); },
+  });
+  pick(sel);
+  if (!reduce) requestAnimationFrame(frame); else render();
+})();
+</script>
+</body>
+</html>
