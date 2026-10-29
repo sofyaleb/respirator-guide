@@ -116,10 +116,10 @@
     <div class="scene">
       <div class="stage">
         <canvas id="scene" role="img" aria-label="Particles moving towards a face wearing the selected mask"></canvas>
-        <span class="tag" id="tag">FFP2 / N95 / KN95</span>
+        <span class="tag" id="tag">No mask</span>
       </div>
       <div class="tally">
-        <div class="tally-head"><strong id="through">10 in 100 get in</strong><span>Out of every 100 particles</span></div>
+        <div class="tally-head"><strong id="through">100 in 100 get in</strong><span>Out of every 100 particles</span></div>
         <div class="waffle" id="waffle" aria-hidden="true"></div>
         <div class="legend">
           <span><i class="dot"></i>Stopped <b id="n-stop">90</b></span>
@@ -132,11 +132,11 @@
 
     <div class="side">
       <section class="result" aria-live="polite">
-        <span class="eyebrow" id="eyebrow">Best match</span>
-        <h2 class="pick" id="pick">FFP2 / N95 / KN95</h2>
+        <span class="eyebrow" id="eyebrow">Starting point</span>
+        <h2 class="pick" id="pick">No mask</h2>
         <div class="facts">
-          <span>Protection <b id="pf">10×</b></span>
-          <span>Typical price <b id="price">$1</b> each</span>
+          <span>Protection <b id="pf">1× (none)</b></span>
+          <span>Typical price <b id="price">$0</b> each</span>
         </div>
         <p class="note" id="note"></p>
         <div class="alts" id="alts"></div>
@@ -174,7 +174,7 @@
     { id: 'hood', name: 'Powered hood (PAPR)', pf: 25, pfLabel: '25×', filter: .0005, price: 600, style: 'hood', note: 'A belt fan pushes filtered air into a loose hood. No seal needed, so it works with a beard.' },
     { id: 'papr', name: 'Powered half mask', pf: 50, pfLabel: '50×', filter: .0005, price: 900, style: 'papr', note: 'A fan-driven tight half mask. Workplace equipment for heavy exposure.' },
   ];
-  const NONE = { id: 'none', name: 'No mask', pf: 1, pfLabel: '1× (none)', filter: 0, price: 0, style: 'none', note: 'Everything in the air reaches your nose and mouth. Shown for comparison.' };
+  const NONE = { id: 'none', name: 'No mask', pf: 1, pfLabel: '1× (none)', filter: 0, price: 0, style: 'none', note: 'Everything in the air reaches your nose and mouth. Move a slider or tap a mask to see the difference.' };
   const PROT = [
     { min: 1, label: 'Just a cover' }, { min: 2, label: 'A little · 2×' }, { min: 4, label: 'Some · 4×' },
     { min: 10, label: 'Good · 10×' }, { min: 20, label: 'High · 20×' }, { min: 50, label: 'Very high · 50×' },
@@ -195,7 +195,7 @@
   let eyebrow = 'Best match';
   const setFill = (el) => el.style.setProperty('--fill', `${(el.value - el.min) / (el.max - el.min) * 100}%`);
 
-  function update() {
+  function update(first) {
     const p = PROT[+prot.value], b = BUDGET[+budget.value];
     $('prot-out').textContent = p.label;
     $('budget-out').textContent = b === Infinity ? 'Any budget' : `Up to ${money(b)}`;
@@ -216,20 +216,20 @@
       best = cheap || strong; others = [strong].filter((m) => m && m !== best);
       eyebrow = 'Nothing fits both. Closest within budget';
     }
-    [best, ...others, NONE].forEach((m, i) => {
+    [NONE, best, ...others].forEach((m, i) => {
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'alt';
-      btn.textContent = i === 0 ? m.name : m === NONE ? 'Compare: no mask' : `${m.name} · ${m.pfLabel} · ${money(m.price)}`;
+      btn.textContent = i <= 1 ? m.name : `${m.name} · ${m.pfLabel} · ${money(m.price)}`;
       btn.addEventListener('click', () => show(m));
       btn.dataset.id = m.id;
       alts.appendChild(btn);
     });
-    show(best);
+    show(first ? NONE : best);
   }
 
   function show(m) {
     const s = split(m);
-    $('eyebrow').textContent = m === NONE ? 'For comparison' : eyebrow;
+    $('eyebrow').textContent = m === NONE ? 'Starting point' : eyebrow;
     $('pick').textContent = m.name;
     $('tag').textContent = m.name;
     $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : '');
@@ -413,9 +413,9 @@
     };
   })();
 
-  prot.addEventListener('input', update);
-  budget.addEventListener('input', update);
-  update();
+  prot.addEventListener('input', () => update());
+  budget.addEventListener('input', () => update());
+  update(true);
 })();
 </script>
 </body>
