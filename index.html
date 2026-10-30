@@ -20,6 +20,7 @@
     --particle: #9aa5a9;
     --filter: #d98a1c;
     --edge: #d4423a;
+    --stop: #3c9a4e;
     --face: #e6eaeb;
     --face-2: #d3dadc;
     --rubber: #4a565a;
@@ -32,14 +33,14 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #0f1517; --surface: #172023; --ink: #e9efef; --ink-soft: #95a3a7; --line: #273235;
-      --accent: #3cc2b5; --accent-soft: #163b38; --particle: #66757a; --filter: #f0a83c; --edge: #ff6b5c;
+      --accent: #3cc2b5; --accent-soft: #163b38; --particle: #66757a; --filter: #f0a83c; --edge: #ff6b5c; --stop: #5cc46e;
       --face: #263235; --face-2: #1f292c; --rubber: #8a9ba0; --cart: #e58bb5; --strap2: #6f9be0; --strap3: #f06a55;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0f1517; --surface: #172023; --ink: #e9efef; --ink-soft: #95a3a7; --line: #273235;
-    --accent: #3cc2b5; --accent-soft: #163b38; --particle: #66757a; --filter: #f0a83c; --edge: #ff6b5c;
+    --accent: #3cc2b5; --accent-soft: #163b38; --particle: #66757a; --filter: #f0a83c; --edge: #ff6b5c; --stop: #5cc46e;
     --face: #263235; --face-2: #1f292c; --rubber: #8a9ba0; --cart: #e58bb5; --strap2: #6f9be0; --strap3: #f06a55;
     color-scheme: dark;
   }
@@ -72,12 +73,14 @@
   .tally-head span { color: var(--ink-soft); }
   .waffle { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
   .waffle i { aspect-ratio: 1; border-radius: 50%; background: var(--line); transition: background-color .35s ease; }
+  .waffle i.s { background: color-mix(in srgb, var(--stop) 60%, transparent); }
   .waffle i.f { background: var(--filter); }
   .waffle i.e { background: var(--edge); }
   .legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; font-size: .8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .legend span { display: inline-flex; align-items: center; gap: .4rem; }
   .legend b { color: var(--ink); font-weight: 600; }
   .dot { width: .6rem; height: .6rem; border-radius: 50%; display: inline-block; background: var(--line); }
+  .dot.s { background: var(--stop); }
   .dot.f { background: var(--filter); }
   .dot.e { background: var(--edge); }
   .side { display: grid; gap: 1.1rem; min-width: 0; align-content: start; }
@@ -149,7 +152,7 @@
         <div class="tally-head"><strong id="through">100 in 100 get in</strong><span>Out of every 100 particles</span></div>
         <div class="waffle" id="waffle" aria-hidden="true"></div>
         <div class="legend">
-          <span><i class="dot"></i>Stopped <b id="n-stop">90</b></span>
+          <span><i class="dot s"></i>Stopped <b id="n-stop">90</b></span>
           <span><i class="dot f"></i>Through the filter <b id="n-filter">6</b></span>
           <span><i class="dot e"></i>Round the edges <b id="n-edge">4</b></span>
           <span id="leg-straight" hidden><i class="dot e"></i>Straight in <b id="n-straight">100</b></span>
@@ -179,7 +182,6 @@
       <section class="more" aria-labelledby="more-h">
         <h3 id="more-h">About this mask</h3>
         <p class="note" id="note"></p>
-        <p class="src" id="src" hidden>Source: <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz, “Stop using ear-loop FFP2 respirators”, Gloze Matrix (2026)</a>, citing a 2023 review in the Journal of Hospital Infection, and readers’ comments on it.</p>
         <div class="products" id="products" hidden><h3>Models to look for</h3><ul></ul><p>Links go to the maker’s or a retailer’s page. We don’t sell anything or earn from these links. Check for a NIOSH approval number or CE mark before you buy.</p></div>
       </section>
     </div>
@@ -188,7 +190,7 @@
   </div>
 </div>
 
-<script src="shared.js?v=20261029"></script>
+<script src="shared.js?v=20261030"></script>
 <script>
 (() => {
   const { MASKS, NONE, money, split, renderProducts } = window.RG;
@@ -220,13 +222,12 @@
     $('price').textContent = m.price ? `${money(m.price)} each` : '$0';
     $('gets').textContent = `${s.total} in 100`;
     $('note').textContent = m.note.replace(' Move a slider or tap a mask to see the difference.', ' Move the protection slider or tap a mask to compare.');
-    $('src').hidden = !(m.id === 'ffp2' || m.id === 'ffp2ear');
     renderProducts($('products'), m.id);
     $('through').textContent = `${s.total} in 100 get in`;
     $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge; $('n-straight').textContent = s.straight;
     $('leg-straight').hidden = !s.straight;
     $('n-edge').parentElement.hidden = !!s.straight;
-    cells.forEach((c, i) => { c.className = i < s.filter ? 'f' : i < s.total ? 'e' : ''; });
+    cells.forEach((c, i) => { c.className = i < s.filter ? 'f' : i < s.total ? 'e' : 's'; });
     document.querySelectorAll('.alt').forEach((a) => a.setAttribute('aria-pressed', String(a.dataset.id === m.id)));
     $('scene').setAttribute('aria-label', s.straight ? 'No mask: every particle reaches the nose and mouth' : `${m.name}: about ${s.total} in 100 particles get in, ${s.filter} through the filter and ${s.edge} round the edges`);
     scene.setMask(m);

@@ -12,7 +12,7 @@ window.RG = (() => {
     { id: 'half', name: 'Half face respirator', tech: 'Reusable elastomeric half mask · EN 140, with P3 (EN 143) or NIOSH P100 filters', pf: 20, pfLabel: '10–20×', filter: .0005, price: 40, style: 'half', note: 'Rubber face piece with P3 or P100 filters you replace. Cheap per day if you wear one a lot.' },
     { id: 'full', name: 'Full face respirator', tech: 'Full-face mask · EN 136, with P3 (EN 143) or NIOSH P100 filters', pf: 40, pfLabel: '40–50×', filter: .0005, price: 200, style: 'full', note: 'Rubber mask with a clear visor and replaceable P3 or P100 filters. Covers your eyes too.' },
     { id: 'hood', name: 'Powered helmet', tech: 'Loose-fitting powered air-purifying respirator (PAPR) · EN 12941 TH2 / TH3', pf: 25, pfLabel: '25×', filter: .0005, price: 600, style: 'hood', note: 'A belt fan pushes filtered air into a helmet with a clear face shield. No tight seal needed, so it works with a beard.' },
-    { id: 'papr', name: 'Powered half face respirator', tech: 'Tight-fitting half-mask PAPR · EN 12942', pf: 50, pfLabel: '50×', filter: .0005, price: 900, style: 'papr', note: 'A fan-driven tight half mask. Workplace equipment for heavy exposure.' },
+    { id: 'papr', name: 'Powered half face respirator', tech: 'Tight-fitting half-mask PAPR · EN 12942 TM3', pf: 40, pfLabel: '40–50×', filter: .0005, price: 900, style: 'papr', note: 'A belt fan pushes filtered air into a tight half mask. Rated the same as a full face respirator, but easier to breathe in over a long shift. Workplace equipment for heavy exposure.' },
   ];
   const NONE = { id: 'none', name: 'No mask', tech: 'No respiratory protection', pf: 1, pfLabel: '1× (none)', filter: 0, price: 0, style: 'none', note: 'Everything in the air reaches your nose and mouth. Move a slider or tap a mask to see the difference.' };
   const money = (v) => v === Infinity ? 'Any' : v === 0 ? '$0' : v < 1 ? `${Math.round(v * 100)}¢` : `$${v.toLocaleString('en-US')}`;
@@ -29,7 +29,7 @@ window.RG = (() => {
     const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
     let C = {}, mask = null, parts = [], scale = 1, ox = 0, oy = 0, last = 0, clock = 0, spawnAcc = 0;
     const readColors = () => {
-      C = {}; ['face', 'face-2', 'accent', 'accent-soft', 'particle', 'filter', 'edge', 'surface', 'line', 'rubber', 'ink-soft', 'cart', 'strap2', 'strap3']
+      C = {}; ['face', 'face-2', 'accent', 'accent-soft', 'particle', 'filter', 'edge', 'stop', 'surface', 'line', 'rubber', 'ink-soft', 'cart', 'strap2', 'strap3']
         .forEach((k) => { C[k] = css('--' + k); });
     };
 
@@ -77,7 +77,7 @@ window.RG = (() => {
 
     // Particles drift in from the air in front of the face: they start small and faint and grow as they
     // reach the mask, so each one visibly lands somewhere. What happens next depends on its fate:
-    // stop = caught on the mask surface, filter = passes through the material (or a filter cartridge),
+    // stop = caught on the mask surface (drawn green), filter = passes through the material (or a filter cartridge),
     // edge = slips in at a gap round the edge, straight = no mask at all.
     const CARTRIDGES = { half: [[150, 202], [250, 202]], full: [[156, 240], [244, 240]], papr: [[200, 222]] };
     const surfacePoint = (b, side) => {
@@ -290,7 +290,7 @@ window.RG = (() => {
           const e = q.t; ctx.globalAlpha = .45 + .55 * e; ctx.fillStyle = q.fate === 'straight' && e > .75 ? C['edge'] : C['particle'];
           ctx.beginPath(); ctx.arc(q.x, q.y, q.r * (.5 + .5 * e), 0, Math.PI * 2); ctx.fill(); continue;
         }
-        const col = q.s === 'stuck' ? C['particle'] : q.s === 'through' ? C['filter'] : C['edge'];
+        const col = q.s === 'stuck' ? C['stop'] || C['particle'] : q.s === 'through' ? C['filter'] : C['edge'];
         if (q.s !== 'stuck' && q.ring < 1) {
           ctx.globalAlpha = (1 - q.ring) * .9; ctx.strokeStyle = col; ctx.lineWidth = 1.8;
           ctx.beginPath(); ctx.arc(q.tx, q.ty, 2 + q.ring * 10, 0, Math.PI * 2); ctx.stroke();
@@ -352,9 +352,6 @@ window.RG = (() => {
       { name: 'Honeywell DF300', tag: 'N95 · flat-fold · head straps', url: 'https://gemplers.com/products/honeywell-df300-flat-fold-n95-respirators', where: 'Gempler’s (retailer)' },
       { name: 'Kimberly-Clark Kimtech 53358', tag: 'N95 · pouch style · two headbands', url: 'https://www.kcprofessional.com/en-us/products/scientific-and-research/lab-environment/disposable-masks/kimtech-n95-pouch-respirator', where: 'Kimberly-Clark Professional' },
       { name: 'Powecom KN95, headband style', tag: 'KN95 · also sold with ear loops, so pick the headband version', url: 'https://bonafidemasks.com/kn95-respirator-mask-headband-style-fda-authorized/', where: 'Bona Fide Masks (US distributor)' },
-    ],
-    ffp2ear: [
-      { name: '3M 9501+', tag: 'KN95 / P2 · knitted ear loops · sold mainly in Asia-Pacific', url: 'https://www.3m.com.sg/3M/en_SG/p/d/v101172567/', where: '3M Singapore' },
     ],
     half: [
       { name: '3M 6000 series (6200)', tag: 'Elastomeric half mask · takes 3M P100 or gas filters', url: 'https://www.3m.com/3M/en_US/p/dc/v101806317/', where: '3M' },
