@@ -162,7 +162,7 @@
 
     <div class="side">
       <div class="ctl">
-        <div class="ctl-head"><label for="prot">Protection</label><output id="prot-out" for="prot">No mask · 1×</output></div>
+        <div class="ctl-head"><label for="prot">Protection</label><output id="prot-out" for="prot">1×</output></div>
         <input type="range" id="prot" min="0" max="10" step="1" value="0">
         <div class="ends"><span>No protection</span><span>Very high</span></div>
       </div>
@@ -190,7 +190,7 @@
   </div>
 </div>
 
-<script src="shared.js?v=20261030"></script>
+<script src="shared.js?v=20261030c"></script>
 <script>
 (() => {
   const { MASKS, NONE, money, split, renderProducts } = window.RG;
@@ -206,9 +206,9 @@
 
   function update() {
     const m = ORDER[+prot.value];
-    const label = `${m.name} · ${m.pfLabel.replace(' (none)', '')}`;
-    $('prot-out').textContent = label;
-    prot.setAttribute('aria-valuetext', label);
+    // the slider shows only the rating, so its label never wraps and pushes the buttons down; the name is in the card
+    $('prot-out').textContent = m.pfLabel.replace(' (none)', '');
+    prot.setAttribute('aria-valuetext', `${m.name}, ${m.pfLabel.replace(' (none)', '')}`);
     setFill(prot);
     show(m);
   }
