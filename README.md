@@ -7,6 +7,6 @@ A simple mask picker, an explainer on how protection factors work, a page on how
 - Time adds up: https://sofyaleb.github.io/respirator-guide/time.html
 - Details: https://sofyaleb.github.io/respirator-guide/details.html
 
-Draft options for the time page, linked from it: https://sofyaleb.github.io/respirator-guide/time-options.html (race, heap, crowded room, scroll through a day).
+The time page shows four ways of seeing it, one after another: a race between two faces, a heap of what gets through, a crowded room, and a day you scroll through. The old draft addresses (time-race.html and so on) redirect to their section.
 
-`shared.js` holds the mask data and the face drawing used by the picker. `time-proto.css` and `time-proto.js` are shared by the four time drafts.
+`shared.js` holds the mask data and the face drawing used by the picker. `time-proto.css` and `time-proto.js` hold the shared styles, mask list and day player for the time page.

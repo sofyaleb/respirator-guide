@@ -1,4 +1,4 @@
-// Shared bits for the four "time adds up" prototypes: the mask list, time formatting, chip buttons and a player that runs a stretch of the day.
+// Shared bits for the four ways of showing time on the Time adds up page: the mask list, time formatting, chip buttons and a player that runs a stretch of the day.
 window.TP = (() => {
   const { MASKS, NONE } = window.RG;
   // the same masks and order as the picker
@@ -56,19 +56,5 @@ window.TP = (() => {
     return { seek, play, pause, get t() { return t; } };
   }
 
-  // the strip at the top of each prototype that links the four together
-  const PROTOS = [['time-race.html', '1 · Race'], ['time-heap.html', '2 · Heap'], ['time-room.html', '3 · Room'], ['time-scroll.html', '4 · Scroll']];
-  function switcher(el) {
-    const here = location.pathname.split('/').pop();
-    const lead = document.createElement('a'); lead.href = 'time-options.html'; lead.textContent = 'All options:';
-    el.replaceChildren(lead, ...PROTOS.map(([href, name]) => {
-      const a = document.createElement('a'); a.href = href; a.textContent = name;
-      if (href === here) a.setAttribute('aria-current', 'page');
-      return a;
-    }));
-    const back = document.createElement('a'); back.href = 'time.html'; back.textContent = 'Current time page'; back.style.marginLeft = 'auto';
-    el.appendChild(back);
-  }
-
-  return { ORDER, WEAR, byId, SHORT, pfText, dur, clock, chips, maskChips, player, switcher };
+  return { ORDER, WEAR, byId, SHORT, pfText, dur, clock, chips, maskChips, player };
 })();
