@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Which Mask Do I Need</title>
-<meta name="description" content="Slide to the protection you want and your budget, and see which mask fits.">
+<meta name="description" content="Slide from no mask to the highest protection and see each mask's protection, price and how many particles still get in.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">
 <style>
@@ -56,8 +56,11 @@
   .top a[aria-current="page"] { color: var(--ink); border-color: transparent; }
   h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.05; letter-spacing: -.03em; font-weight: 500; margin: 0; text-wrap: balance; }
   .sub { margin: .75rem 0 0; color: var(--ink-soft); max-width: 40ch; }
-  .main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
-  @media (max-width: 820px) { .main { grid-template-columns: 1fr; gap: 1.75rem; } }
+  /* the picture with the footer pinned under it on the left; the controls, a fixed card and the details on the right.
+     On phones: picture, controls and card, details, then the footer. */
+  .main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-areas: "scene side" "foot side"; grid-template-rows: auto 1fr; column-gap: 2.5rem; row-gap: 1.25rem; align-items: start; }
+  .scene { grid-area: scene; } .side { grid-area: side; } .main > .foot { grid-area: foot; }
+  @media (max-width: 820px) { .main { grid-template-columns: 1fr; grid-template-areas: "scene" "side" "foot"; grid-template-rows: auto; row-gap: 1.75rem; } }
   .scene { background: var(--surface); border-radius: 20px; overflow: hidden; display: grid; }
   .stage { position: relative; aspect-ratio: 4 / 3; max-width: 100%; }
   .stage canvas { display: block; width: 100%; height: 100%; }
@@ -77,8 +80,17 @@
   .dot { width: .6rem; height: .6rem; border-radius: 50%; display: inline-block; background: var(--line); }
   .dot.f { background: var(--filter); }
   .dot.e { background: var(--edge); }
-  .side { display: grid; gap: 2rem; min-width: 0; }
-  .result { display: grid; gap: .35rem; }
+  .side { display: grid; gap: 1.1rem; min-width: 0; align-content: start; }
+  .key { background: var(--surface); border-radius: 20px; padding: 1.1rem 1.2rem 1.2rem; display: grid; gap: .3rem; margin-top: .4rem; box-shadow: 0 1px 2px rgba(20,32,36,.04), 0 8px 24px rgba(20,32,36,.05); }
+  /* every mask fills the card the same way: two lines kept for the name and for the technical name, so the facts never move */
+  .key .pick { min-height: 2.3em; display: flex; align-items: flex-end; }
+  .key .tech { min-height: 2.8em; }
+  .keyfacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: .4rem 0 0; padding-top: .8rem; border-top: 1px solid var(--line); }
+  .keyfacts div { display: grid; gap: .1rem; min-width: 0; }
+  .keyfacts dt { font-size: .75rem; color: var(--ink-soft); }
+  .keyfacts dd { margin: 0; font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .more { display: grid; gap: .35rem; padding-top: .4rem; }
+  .more > h3 { margin: 0; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; }
   .eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
   .pick { font-size: clamp(1.75rem, 3.5vw, 2.25rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.15; margin: 0; }
   .tech { margin: 0 0 .35rem; font-size: .85rem; color: var(--ink-soft); line-height: 1.4; }
@@ -95,21 +107,15 @@
   .pr-top a:hover, .pr-top a:focus-visible { text-decoration: underline; }
   .products li > span { font-size: .8rem; color: var(--ink-soft); }
   .products p { margin: 0; font-size: .75rem; color: var(--ink-soft); }
-  .facts { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-  .facts b { color: var(--ink); font-weight: 600; }
-  .note { color: var(--ink-soft); font-size: .9rem; margin: .25rem 0 0; }
-  .alts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+  .note { color: var(--ink); font-size: .95rem; margin: 0; }
+  .alts { display: flex; flex-wrap: wrap; gap: .45rem; }
   .alt { font: inherit; font-size: .85rem; padding: .4rem .8rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
   .alt:hover { border-color: var(--ink-soft); }
   .alt[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
   .alt:focus-visible, input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  .controls { display: grid; gap: 1.6rem; }
   .ctl { display: grid; gap: .6rem; }
   .ctl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
-  .ctl label, .ctl-label { font-weight: 500; }
-  input[type=range]:disabled { cursor: default; opacity: 1; }
-  input[type=range]:disabled::-webkit-slider-thumb { border-color: var(--ink-soft); }
-  input[type=range]:disabled::-moz-range-thumb { border-color: var(--ink-soft); }
+  .ctl label { font-weight: 500; }
   .ctl output { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
   .ends { display: flex; justify-content: space-between; font-size: .75rem; color: var(--ink-soft); }
   input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; margin: 0; cursor: pointer; }
@@ -118,7 +124,7 @@
   input[type=range]::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--accent); }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); margin-top: -9px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
   input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
-  .foot { font-size: .8rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 1rem; max-width: 60ch; }
+  .foot { font-size: .8rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 1rem; margin: 0; max-width: 60ch; }
   .foot a { color: var(--ink); }
 </style>
 </head>
@@ -131,7 +137,7 @@
 
   <header>
     <h1>Which mask do you need?</h1>
-    <p class="sub">Slide from no protection to very high, and see each mask's price and how many particles still get in.</p>
+    <p class="sub">A mask's <b>protection factor</b> is how many times less you breathe in: at 10×, about 1 in every 10 particles in the air still reaches you.</p>
   </header>
 
   <div class="main">
@@ -152,36 +158,34 @@
     </div>
 
     <div class="side">
-      <div class="controls">
-        <div class="ctl">
-          <div class="ctl-head"><label for="prot">Protection</label><output id="prot-out" for="prot">No mask · 1×</output></div>
-          <input type="range" id="prot" min="0" max="10" step="1" value="0" list="prot-steps">
-          <div class="ends"><span>No protection</span><span>Very high</span></div>
-        </div>
-        <div class="ctl">
-          <div class="ctl-head"><span class="ctl-label" id="price-label">Typical price</span><output id="budget-out">$0</output></div>
-          <input type="range" id="budget" min="0" max="10" step="1" value="0" disabled aria-labelledby="price-label" aria-readonly="true">
-          <div class="ends"><span>Cheapest</span><span>Most expensive</span></div>
-        </div>
+      <div class="ctl">
+        <div class="ctl-head"><label for="prot">Protection</label><output id="prot-out" for="prot">No mask · 1×</output></div>
+        <input type="range" id="prot" min="0" max="10" step="1" value="0">
+        <div class="ends"><span>No protection</span><span>Very high</span></div>
       </div>
-      <section class="result" aria-live="polite">
+      <div class="alts" id="alts" role="group" aria-label="Pick a mask"></div>
+
+      <section class="key" aria-live="polite" aria-labelledby="pick">
         <span class="eyebrow" id="eyebrow">1 of 11 by protection</span>
         <h2 class="pick" id="pick">No mask</h2>
         <p class="tech" id="tech">No respiratory protection</p>
-        <div class="facts">
-          <span>Protection <b id="pf">1× (none)</b></span>
-          <span>Typical price <b id="price">$0</b> each</span>
-        </div>
+        <dl class="keyfacts">
+          <div><dt>Protection</dt><dd id="pf">1× (none)</dd></div>
+          <div><dt>Gets in</dt><dd id="gets">100 in 100</dd></div>
+          <div><dt>Typical price</dt><dd id="price">$0</dd></div>
+        </dl>
+      </section>
+
+      <section class="more" aria-labelledby="more-h">
+        <h3 id="more-h">About this mask</h3>
         <p class="note" id="note"></p>
         <p class="src" id="src" hidden>Source: <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz, “Stop using ear-loop FFP2 respirators”, Gloze Matrix (2026)</a>, citing a 2023 review in the Journal of Hospital Infection, and readers’ comments on it.</p>
         <div class="products" id="products" hidden><h3>Models to look for</h3><ul></ul><p>Links go to the maker’s or a retailer’s page. We don’t sell anything or earn from these links. Check for a NIOSH approval number or CE mark before you buy.</p></div>
-        <div class="alts" id="alts"></div>
       </section>
-
     </div>
-  </div>
 
-  <p class="foot">Protection factors assume the mask fits and is worn well. They are UK HSE and US OSHA ratings; cloth and surgical masks are rough estimates from studies. The split between filter and edges is illustrative, based on each standard's filter limit: on a good respirator, most of what gets in comes round the edges. Prices are typical US prices and vary. Ear-loop fit figures are from a <a href="https://www.journalofhospitalinfection.com/article/S0195-6701(23)00030-0/fulltext" target="_blank" rel="noopener">2023 review of 29 studies</a>, via <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz's post on ear-loop FFP2s</a>. <a href="explain.html">How protection works</a> · <a href="time.html">How time adds up</a> · <a href="details.html">Full comparison and sources</a>.</p>
+    <p class="foot">Protection factors assume the mask fits and is worn well. They are UK HSE and US OSHA ratings; cloth and surgical masks are rough estimates from studies. The split between filter and edges is illustrative, based on each standard's filter limit: on a good respirator, most of what gets in comes round the edges. Prices are typical US prices and vary. Ear-loop fit figures are from a <a href="https://www.journalofhospitalinfection.com/article/S0195-6701(23)00030-0/fulltext" target="_blank" rel="noopener">2023 review of 29 studies</a>, via <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz's post on ear-loop FFP2s</a>. <a href="explain.html">How protection works</a> · <a href="time.html">How time adds up</a> · <a href="details.html">Full comparison and sources</a>.</p>
+  </div>
 </div>
 
 <script src="shared.js?v=20261029"></script>
@@ -191,11 +195,9 @@
   // the 11 masks from no protection to very high; ties go to the cheaper one first
   const ORDER = ['none', 'cloth', 'surgical', 'ffp2ear', 'ffp1', 'ffp2', 'ffp3', 'half', 'hood', 'full', 'papr']
     .map((id) => [NONE, ...MASKS].find((m) => m.id === id));
-  // the same masks from cheapest to most expensive, for the price scale
-  const BY_PRICE = [...ORDER].sort((a, b) => a.price - b.price);
 
   const $ = (id) => document.getElementById(id);
-  const prot = $('prot'), budget = $('budget'), waffle = $('waffle');
+  const prot = $('prot'), waffle = $('waffle');
   for (let i = 0; i < 100; i++) waffle.appendChild(document.createElement('i'));
   const cells = [...waffle.children];
   const setFill = (el) => el.style.setProperty('--fill', `${(el.value - el.min) / (el.max - el.min) * 100}%`);
@@ -205,10 +207,7 @@
     const label = `${m.name} · ${m.pfLabel.replace(' (none)', '')}`;
     $('prot-out').textContent = label;
     prot.setAttribute('aria-valuetext', label);
-    budget.value = BY_PRICE.indexOf(m);
-    $('budget-out').textContent = money(m.price);
-    budget.setAttribute('aria-valuetext', `${money(m.price)}, ${BY_PRICE.indexOf(m) + 1} of 11 by price`);
-    setFill(prot); setFill(budget);
+    setFill(prot);
     show(m);
   }
 
@@ -218,7 +217,8 @@
     $('pick').textContent = m.name;
     $('tech').textContent = m.tech;
     $('pf').textContent = m.pfLabel + (m.est ? ' (estimate)' : m.ill ? ' (illustrative)' : '');
-    $('price').textContent = money(m.price);
+    $('price').textContent = m.price ? `${money(m.price)} each` : '$0';
+    $('gets').textContent = `${s.total} in 100`;
     $('note').textContent = m.note.replace(' Move a slider or tap a mask to see the difference.', ' Move the protection slider or tap a mask to compare.');
     $('src').hidden = !(m.id === 'ffp2' || m.id === 'ffp2ear');
     renderProducts($('products'), m.id);
@@ -236,7 +236,7 @@
   const scene = window.RG.createScene($('scene'));
 
   prot.addEventListener('input', () => update());
-  // mask buttons in the answer card, in protection order; tapping one moves the slider to it
+  // mask buttons under the slider, in protection order; tapping one moves the slider to it
   ORDER.forEach((m, k) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'alt'; b.dataset.id = m.id; b.textContent = m.name;
