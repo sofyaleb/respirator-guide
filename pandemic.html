@@ -91,14 +91,14 @@
   <header>
     <h1>Good respirators could stop even a worst-case pandemic</h1>
     <p class="lede">If the people who have to keep working all wore well-fitting respirators, and everyone else stayed home for a while, even a very contagious, very deadly airborne virus would stop spreading, buying time for vaccines.</p>
-    <p class="credit">This page explains the argument in <a href="https://defensesindepth.bio/universal-respirator-usage-stops-worst-case-pandemics/" target="_blank" rel="noopener">“Universal respirator usage stops worst-case pandemics”</a> by Constantin Arnscheidt and Damon Binder (Defenses in Depth, October 2026), in plain language. Unless marked as this guide's official ratings, the numbers are theirs; the interactive tools are simplified from their model.</p>
+    <p class="credit">This page explains the argument in <a href="https://defensesindepth.bio/universal-respirator-usage-stops-worst-case-pandemics/" target="_blank" rel="noopener">“Universal respirator usage stops worst-case pandemics”</a> by Constantin Arnscheidt and Damon Binder (Defenses in Depth, October 2026), in plain language, with workforce and supply figures from two RAND reports. Unless marked otherwise, the numbers are theirs; the interactive tools are simplified from their model.</p>
     <div class="summary">
       <div class="card"><b>R below 1</b><span>The goal. When each case infects fewer than one other person on average, an outbreak dies out.</span></div>
       <div class="card"><b>About 18×</b><span>The group protection factor the authors estimate is enough for essential workers, even against a virus as contagious as measles.</span></div>
       <div class="card"><b>~$60M a year</b><span>Roughly what it would cost the US to keep 20 million reusable respirators ready, under 0.001% of federal spending.</span></div>
     </div>
     <nav class="toc" aria-label="On this page">
-      <a href="#worst">The worst case</a><a href="#r">R below 1</a><a href="#workers">Essential workers</a><a href="#airborne">Airborne</a><a href="#respirators">How respirators get there</a><a href="#enough">How much is enough</a><a href="#air">Air cleaning</a><a href="#cost">Cost</a><a href="#you">What it means for you</a><a href="#caveats">Caveats</a>
+      <a href="#worst">The worst case</a><a href="#r">R below 1</a><a href="#workers">Essential workers</a><a href="#airborne">Airborne</a><a href="#respirators">How respirators get there</a><a href="#enough">How much is enough</a><a href="#air">Air cleaning</a><a href="#cost">Cost</a><a href="#supply">Supply</a><a href="#you">What it means for you</a><a href="#caveats">Caveats</a>
     </nav>
   </header>
 
@@ -153,6 +153,21 @@
       <li>Essential workers keep working, wearing good respirators all the time they share air, so that R among them stays below 1.</li>
       <li>This holds until vaccines, treatments or better tests arrive.</li>
     </ol>
+    <p>How many people that is depends on who counts. A RAND study went occupation by occupation rather than sector by sector, because risk differs a lot within a sector: a hospital nurse and a hospital accountant face very different exposure. About 39% of workers in critical sectors could work from home. Its US estimates:</p>
+    <div class="tblwrap">
+      <table class="tbl">
+        <thead><tr><th>Who counts as essential</th><th>US workers</th></tr></thead>
+        <tbody>
+          <tr><td>Everyone working in critical sectors</td><td>85.7 million</td></tr>
+          <tr><td>Critical sectors, leaving out those who can work from home</td><td><b>52 million</b></td></tr>
+          <tr><td>…who also face above-average exposure</td><td>27 million</td></tr>
+          <tr><td>Lifeline sectors only (health care, utilities, food manufacturing, schools, essential shops), on site</td><td>24.6 million</td></tr>
+          <tr><td>Health care workers who must be on site</td><td>14.3 million</td></tr>
+          <tr><td>Above-average exposure <i>and</i> above-average importance to the rest of the economy</td><td><b>5.3 million</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Even with no pandemic, 8 to 10 million US workers already wear specialised protective equipment for their jobs, which sets a floor for how much has to be made anyway. Source: <a href="https://www.rand.org/pubs/research_reports/RRA5083-1.html" target="_blank" rel="noopener">RAND, Personal Protective Equipment Prioritization and Demand (2026)</a>.</p>
     <p>Staying home is costly, so it only makes sense for a truly severe virus. The harder part is keeping essential workers safe enough, and feeling safe enough, to keep showing up.</p>
   </section>
 
@@ -243,7 +258,7 @@
     <span class="eyebrow">8 · Cost</span>
     <h2 id="h-cost">A stockpile would be cheap</h2>
     <p>Disposable respirators cost about $1 each and last a few days of wear. A reusable elastomeric half mask costs about $30 and lasts years. If an emergency lasts more than about three months, the reusable mask is cheaper, and it protects better. That makes elastomeric masks with P100 filters the authors' pick for a stockpile.</p>
-    <p>For the US, 20 million elastomeric masks would cost about $600 million. Add as much again for storage and handing them out, spread it over a 20-year shelf life, and it comes to roughly $60 million a year: under 0.001% of federal spending. Other countries would find it similarly affordable. Work out your own:</p>
+    <p>For the US, 20 million elastomeric masks would cost about $600 million. (RAND's estimates of who needs one, from 5.3 to 52 million workers, are in the calculator's presets.) Add as much again for storage and handing them out, spread it over a 20-year shelf life, and it comes to roughly $60 million a year: under 0.001% of federal spending. Other countries would find it similarly affordable. Work out your own:</p>
 
     <div class="card tool" id="cost-tool">
       <div class="two-col">
@@ -265,8 +280,21 @@
     </div>
   </section>
 
+  <section class="sec" id="supply" aria-labelledby="h-supply">
+    <span class="eyebrow">9 · Supply</span>
+    <h2 id="h-supply">Why not just make them when we need them?</h2>
+    <p>Because when a pandemic starts, everyone needs them at once. A second RAND study looked at why the US struggled to make enough respirators during COVID-19:</p>
+    <ul>
+      <li><b>Most masks are made in one place.</b> Before COVID, China made about half the world's masks, around 20 million a day. During the pandemic it supplied over 85% of US imports of N95s and face masks, and countries can and did restrict exports.</li>
+      <li><b>The filter fabric is a bottleneck.</b> N95s and replacement filters rely on a special electrically charged “meltblown” polypropylene fabric. The material and the machines that make it run short exactly when demand surges.</li>
+      <li><b>New makers don't survive the quiet years.</b> Of 107 US protective equipment companies started during the pandemic, 102 have since stopped making it, undercut by cheaper imports once demand fell.</li>
+      <li><b>Stockpiles expire and funding fades.</b> Stored equipment has expiry dates and needs replacing, but stockpile funding tends to shrink between emergencies. Programmes that test whether expiry dates can safely be extended help.</li>
+    </ul>
+    <p>RAND's conclusion is that stockpiles are essential but not enough on their own: they need a steady, working manufacturing base behind them, which it argues needs predictable demand, such as long-term contracts, rather than boom and bust. Source: <a href="https://www.rand.org/pubs/research_reports/RRA5031-1.html" target="_blank" rel="noopener">RAND, Respirator Surge Manufacturing (2026)</a>, which also covers procurement, tax and trade policy.</p>
+  </section>
+
   <section class="sec" id="you" aria-labelledby="h-you">
-    <span class="eyebrow">9 · For you</span>
+    <span class="eyebrow">10 · For you</span>
     <h2 id="h-you">What it means if you're choosing a mask</h2>
     <div class="you">
       <div class="card"><h3>A reusable elastomeric mask is the sweet spot</h3><p>With P100 or P3 filters it protects more than a disposable respirator, and over months it costs less. It is what the authors would stockpile.</p></div>
@@ -274,11 +302,12 @@
       <div class="card"><h3>Wear it all the time you share air</h3><p>Ten minutes off in a crowded room can undo hours of protection. Consistency is what drives R below 1.</p></div>
       <div class="card"><h3>Skip the valve if you might be ill</h3><p>A mask without a breathe-out valve protects the people around you too, which is half of the PF × PF effect.</p></div>
     </div>
+    <p class="callout warn"><b>Watch out for fakes.</b> The CDC has estimated that around 60% of KN95s sold in the US were counterfeit, and between May 2025 and January 2026 NIOSH found 1,245 online listings falsely claiming its approval. Buy from the maker or a known distributor, and check an N95's approval number on NIOSH's <a href="https://wwwn.cdc.gov/NIOSH-CEL/" target="_blank" rel="noopener">Certified Equipment List</a>. The CDC shows <a href="https://www.cdc.gov/niosh/ppe/counterfeit_respirators/index.html" target="_blank" rel="noopener">examples of fakes</a>.</p>
     <p><a href="./">Find a mask in the picker</a> · <a href="time.html">See how time in a mask adds up</a></p>
   </section>
 
   <section class="sec" id="caveats" aria-labelledby="h-caveats">
-    <span class="eyebrow">10 · Caveats</span>
+    <span class="eyebrow">11 · Caveats</span>
     <h2 id="h-caveats">What the argument assumes</h2>
     <ul>
       <li>The model is deliberately pessimistic and isn't fitted to any one disease. It assumes air in a room mixes evenly and that the virus doesn't decay in the air, both of which overstate spread.</li>
@@ -294,8 +323,11 @@
   <section class="sec" aria-labelledby="h-sources">
     <h2 id="h-sources">Sources</h2>
     <ul class="sources">
-      <li>Constantin Arnscheidt and Damon Binder, <a href="https://defensesindepth.bio/universal-respirator-usage-stops-worst-case-pandemics/" target="_blank" rel="noopener">Universal respirator usage stops worst-case pandemics</a>, Defenses in Depth (2026). The source for everything on this page; its appendices give the full model.</li>
+      <li>Constantin Arnscheidt and Damon Binder, <a href="https://defensesindepth.bio/universal-respirator-usage-stops-worst-case-pandemics/" target="_blank" rel="noopener">Universal respirator usage stops worst-case pandemics</a>, Defenses in Depth (2026). The source for the argument, the model and the tools on this page; its appendices give the full model.</li>
       <li>Group protection factor studies cited there: Lee et al. (2016) and Lawrence et al. (2006) on N95 and FFP2 respirators; Duncan et al. (2020) on N95s over five days; Janssen and McCullough (2009) and Vo et al. (2015) on elastomeric P100 respirators.</li>
+      <li>Aaron Strong, Henry H. Willis, Casey Aveggio and Cheryl K. Montemayor, <a href="https://www.rand.org/pubs/research_reports/RRA5083-1.html" target="_blank" rel="noopener">Personal Protective Equipment Prioritization and Demand</a>, RAND (2026). How many US workers would need protection.</li>
+      <li>Saskia Popescu, Rushil Bakhshi, Derek Roberts and others, <a href="https://www.rand.org/pubs/research_reports/RRA5031-1.html" target="_blank" rel="noopener">Respirator Surge Manufacturing</a>, RAND (2026). Supply, counterfeits and stockpiles, including the CDC and NIOSH counterfeit figures quoted here.</li>
+      <li>CDC / NIOSH, <a href="https://www.cdc.gov/niosh/ppe/counterfeit_respirators/index.html" target="_blank" rel="noopener">Counterfeit and misrepresented respirators</a> and the <a href="https://wwwn.cdc.gov/NIOSH-CEL/" target="_blank" rel="noopener">Certified Equipment List</a>.</li>
       <li>Official ratings: US OSHA assigned protection factors and UK HSE guidance (HSG53), as used across this guide.</li>
     </ul>
   </section>
@@ -409,7 +441,7 @@
       `<tr${r.total === best && n ? ' class="hi"' : ''}><td><b>${r.k.name}</b></td><td>$${r.k.each.toLocaleString('en-US')}</td><td>${r.k.lasts}</td><td>${money(r.daily)}</td><td><b>${n ? money(r.total) : '—'}</b></td></tr>`).join('');
     $('cost-stock').textContent = n ? `Kept as a stockpile of elastomeric half masks for 20 years, with as much again for storage and handing them out: about ${money(n * 30 * 2 / 20)} a year.` : '';
   }
-  chips($('cost-presets'), [['1000', 'A hospital · 1,000'], ['100000', 'A city · 100,000'], ['20000000', 'US · 20 million']], '20000000', (v) => { $('cost-n').value = (+v).toLocaleString('en-US'); cost(); });
+  chips($('cost-presets'), [['1000', 'A hospital · 1,000'], ['5300000', 'US top priority · 5.3m'], ['14300000', 'US health care · 14.3m'], ['20000000', 'US, article · 20m'], ['52000000', 'US critical, on site · 52m']], '20000000', (v) => { $('cost-n').value = (+v).toLocaleString('en-US'); cost(); });
   chips($('cost-days'), DAYS.map(([d, l]) => [String(d), l]), '365', (d) => { days = +d; cost(); });
   $('cost-n').addEventListener('input', cost);
   $('cost-n').addEventListener('change', () => { $('cost-n').value = workers().toLocaleString('en-US'); });

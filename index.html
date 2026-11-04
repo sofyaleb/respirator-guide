@@ -49,11 +49,11 @@
   html, body { margin: 0; }
   body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 68rem; margin-inline: auto; padding-block: 1.5rem 3rem; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); display: grid; gap: 2rem; }
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-size: .875rem; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-size: .875rem; flex-wrap: wrap; }
   .brand { font-weight: 600; letter-spacing: -.01em; }
   .top a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
   .top a:hover, .top a:focus-visible { color: var(--ink); border-color: var(--ink); }
-  .links { display: flex; gap: 1.1rem; }
+  .links { display: flex; gap: .4rem 1.1rem; flex-wrap: wrap; }
   .top a[aria-current="page"] { color: var(--ink); border-color: transparent; }
   h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.05; letter-spacing: -.03em; font-weight: 500; margin: 0; text-wrap: balance; }
   .sub { margin: .75rem 0 0; color: var(--ink-soft); max-width: 40ch; }
@@ -113,6 +113,8 @@
   .pr-top a:hover, .pr-top a:focus-visible { text-decoration: underline; }
   .products li > span { font-size: .8rem; color: var(--ink-soft); }
   .products p { margin: 0; font-size: .75rem; color: var(--ink-soft); }
+  .products p.fakes { font-size: .85rem; color: var(--ink); margin-top: .35rem; padding: .6rem .75rem; border-radius: 12px; background: color-mix(in srgb, var(--edge) 10%, transparent); }
+  .products p.fakes a { color: var(--ink); }
   .note { color: var(--ink); font-size: .95rem; margin: 0; }
   .alts { display: flex; flex-wrap: wrap; gap: .45rem; }
   .alt { font: inherit; font-size: .85rem; padding: .4rem .8rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
@@ -186,7 +188,7 @@
         <h3 id="more-h">About this mask</h3>
         <p class="note" id="note"></p>
         <p class="measured" id="measured" hidden></p>
-        <div class="products" id="products" hidden><h3>Models to look for</h3><ul></ul><p>Links go to the maker’s or a retailer’s page. We don’t sell anything or earn from these links. Check for a NIOSH approval number or CE mark before you buy.</p></div>
+        <div class="products" id="products" hidden><h3>Models to look for</h3><ul></ul><p>Links go to the maker’s or a retailer’s page. We don’t sell anything or earn from these links.</p><p class="fakes"><b>Watch out for fakes.</b> The CDC has estimated that around 60% of KN95s sold in the US were counterfeit. Buy from the maker or a known distributor. For an N95, check the approval number on NIOSH's <a href="https://wwwn.cdc.gov/NIOSH-CEL/" target="_blank" rel="noopener">Certified Equipment List</a>; for an FFP2, look for EN 149 and a CE mark followed by a four-digit number.</p></div>
       </section>
     </div>
 
