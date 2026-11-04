@@ -1,10 +1,11 @@
 # Respiratory Guide v1
 
-A simple mask picker, an explainer on how protection factors work, a page on how time in a mask adds up, and a full comparison.
+A simple mask picker, an explainer on how protection factors work, a page on how time in a mask adds up, a page on how universal respirator use could stop a worst-case pandemic, and a full comparison.
 
 - Picker: https://sofyaleb.github.io/respirator-guide/
 - How protection works: https://sofyaleb.github.io/respirator-guide/explain.html
 - Time adds up: https://sofyaleb.github.io/respirator-guide/time.html
+- Stopping a pandemic: https://sofyaleb.github.io/respirator-guide/pandemic.html (a plain-language version of Arnscheidt and Binder, “Universal respirator usage stops worst-case pandemics”, Defenses in Depth, 2026)
 - Details: https://sofyaleb.github.io/respirator-guide/details.html
 
 The time page shows four ways of seeing it, one after another: a race between two faces, a heap of what gets through, a crowded room, and a day you scroll through. The old draft addresses (time-race.html and so on) redirect to their section.

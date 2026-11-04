@@ -59,7 +59,7 @@
 </head>
 <body>
 <div id="dash-root">
-<nav style="max-width:72rem;margin:0 auto 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.875rem;flex-wrap:wrap"><span style="font-weight:600;letter-spacing:-.01em">Respiratory guide v1</span><span style="display:flex;gap:1.1rem;flex-wrap:wrap"><a href="./" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">Mask picker</a><a href="explain.html" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">How protection works</a><a href="time.html" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">Time adds up</a><a href="details.html" aria-current="page" style="color:var(--color-fg);text-decoration:none">Details</a></span></nav>
+<nav style="max-width:72rem;margin:0 auto 2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.875rem;flex-wrap:wrap"><span style="font-weight:600;letter-spacing:-.01em">Respiratory guide v1</span><span style="display:flex;gap:1.1rem;flex-wrap:wrap"><a href="./" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">Mask picker</a><a href="explain.html" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">How protection works</a><a href="time.html" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">Time adds up</a><a href="pandemic.html" style="color:var(--color-fg-muted);text-decoration:none;border-bottom:1px solid var(--color-border-line);padding-bottom:1px">Stopping a pandemic</a><a href="details.html" aria-current="page" style="color:var(--color-fg);text-decoration:none">Details</a></span></nav>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
   // Minimal stand-in for the claude.ai dashboard runtime, so the page runs as a plain file.
@@ -188,6 +188,23 @@
       <span><i class="rp-key eq"></i>Equivalent class, no factor of its own</span>
       <span><i class="rp-key est"></i>Estimate from studies (no official rating)</span>
     </div>
+  </section>
+
+  <section class="rp-section rp-card" id="measured">
+    <div>
+      <h2 class="rp-h2">Official ratings and measured protection</h2>
+      <p class="rp-note">The ratings above are official assigned protection factors: cautious figures regulators expect nearly every worker to reach. Studies that measure groups of people wearing respirators through a working day usually find more. <a href="pandemic.html#respirators">Stopping a pandemic</a> explains why this matters.</p>
+    </div>
+    <div class="rp-tablewrap">
+      <table class="rp-table">
+        <thead><tr><th>Type</th><th>Official rating</th><th>Measured in groups of wearers</th><th>Studies</th></tr></thead>
+        <tbody>
+          <tr><td>N95 / FFP2 / KN95</td><td class="rp-pf">10×</td><td class="rp-pf">15–40×</td><td>Lee et al. 2016; Lawrence et al. 2006; Duncan et al. 2020</td></tr>
+          <tr><td>Elastomeric half mask, P100 / P3</td><td class="rp-pf">10× (US) to 20× (UK)</td><td class="rp-pf">30–70×, possibly over 100× with fit testing</td><td>Janssen and McCullough 2009; unpublished Amodo Design results</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="rp-note">Measured figures are the group average, weighted so that a few poorly fitting masks pull it down, as summarised in <a href="https://defensesindepth.bio/universal-respirator-usage-stops-worst-case-pandemics/" target="_blank" rel="noopener">Arnscheidt and Binder (2026)</a>.</p>
   </section>
 
   <section class="rp-section">

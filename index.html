@@ -93,6 +93,9 @@
   .keyfacts dt { font-size: .75rem; color: var(--ink-soft); }
   .keyfacts dd { margin: 0; font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .more { display: grid; gap: .35rem; padding-top: .4rem; }
+  .measured { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+  .measured b { color: var(--ink); }
+  .measured a { color: var(--ink); }
   .more > h3 { margin: 0; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; }
   .eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
   .pick { font-size: clamp(1.75rem, 3.5vw, 2.25rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.15; margin: 0; }
@@ -135,7 +138,7 @@
 <div class="wrap">
   <nav class="top">
     <span class="brand">Respiratory guide v1</span>
-    <span class="links"><a href="./" aria-current="page">Mask picker</a><a href="explain.html">How protection works</a><a href="time.html">Time adds up</a><a href="details.html">Details</a></span>
+    <span class="links"><a href="./" aria-current="page">Mask picker</a><a href="explain.html">How protection works</a><a href="time.html">Time adds up</a><a href="pandemic.html">Stopping a pandemic</a><a href="details.html">Details</a></span>
   </nav>
 
   <header>
@@ -182,15 +185,16 @@
       <section class="more" aria-labelledby="more-h">
         <h3 id="more-h">About this mask</h3>
         <p class="note" id="note"></p>
+        <p class="measured" id="measured" hidden></p>
         <div class="products" id="products" hidden><h3>Models to look for</h3><ul></ul><p>Links go to the maker’s or a retailer’s page. We don’t sell anything or earn from these links. Check for a NIOSH approval number or CE mark before you buy.</p></div>
       </section>
     </div>
 
-    <p class="foot">Protection factors assume the mask fits and is worn well. They are UK HSE and US OSHA ratings; cloth and surgical masks are rough estimates from studies. The split between filter and edges is illustrative, based on each standard's filter limit: on a good respirator, most of what gets in comes round the edges. Prices are typical US prices and vary. Ear-loop fit figures are from a <a href="https://www.journalofhospitalinfection.com/article/S0195-6701(23)00030-0/fulltext" target="_blank" rel="noopener">2023 review of 29 studies</a>, via <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz's post on ear-loop FFP2s</a>. <a href="explain.html">How protection works</a> · <a href="time.html">How time adds up</a> · <a href="details.html">Full comparison and sources</a>.</p>
+    <p class="foot">Protection factors assume the mask fits and is worn well. They are UK HSE and US OSHA ratings; cloth and surgical masks are rough estimates from studies. The split between filter and edges is illustrative, based on each standard's filter limit: on a good respirator, most of what gets in comes round the edges. Prices are typical US prices and vary. Ear-loop fit figures are from a <a href="https://www.journalofhospitalinfection.com/article/S0195-6701(23)00030-0/fulltext" target="_blank" rel="noopener">2023 review of 29 studies</a>, via <a href="https://glozematrix.substack.com/p/stop-using-ear-loop-ffp2-respirators" target="_blank" rel="noopener">Max Görlitz's post on ear-loop FFP2s</a>. <a href="explain.html">How protection works</a> · <a href="time.html">How time adds up</a> · <a href="pandemic.html">Stopping a pandemic</a> · <a href="details.html">Full comparison and sources</a>.</p>
   </div>
 </div>
 
-<script src="shared.js?v=20261030c"></script>
+<script src="shared.js?v=20261103"></script>
 <script>
 (() => {
   const { MASKS, NONE, money, split, renderProducts } = window.RG;
@@ -222,6 +226,8 @@
     $('price').textContent = m.price ? `${money(m.price)} each` : '$0';
     $('gets').textContent = `${s.total} in 100`;
     $('note').textContent = m.note.replace(' Move a slider or tap a mask to see the difference.', ' Move the protection slider or tap a mask to compare.');
+    $('measured').hidden = !m.measured;
+    if (m.measured) $('measured').innerHTML = `Measured in studies: <b>${m.measured}</b> on average across groups of wearers, against an official ${m.pfLabel}. <a href="pandemic.html#respirators">Why they differ</a>.`;
     renderProducts($('products'), m.id);
     $('through').textContent = `${s.total} in 100 get in`;
     $('n-stop').textContent = s.stop; $('n-filter').textContent = s.filter; $('n-edge').textContent = s.edge; $('n-straight').textContent = s.straight;
