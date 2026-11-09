@@ -52,7 +52,7 @@
   @media (max-width: 560px) { .outcome { grid-template-columns: 1fr; } }
   /* generations of cases, each bar on a log scale */
   .gens { display: grid; grid-template-columns: repeat(7, 1fr); gap: .4rem; align-items: end; height: 150px; }
-  .gens div { display: grid; align-content: end; justify-items: center; gap: .25rem; height: 100%; min-width: 0; }
+  .gens div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: .25rem; height: 100%; min-width: 0; }
   .gens i { display: block; width: 100%; border-radius: 6px 6px 2px 2px; background: var(--edge); transition: height .4s ease, background-color .3s; min-height: 3px; }
   .gens i.down { background: var(--stop); }
   .gens span { font-size: .7rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -379,7 +379,7 @@
     const r = Math.sqrt(rLo * rHi);
     [...gens.children].forEach((d, g) => {
       const n = Math.min(8e9, 100 * r ** g);
-      d.querySelector('i').style.height = `${Math.max(2, Math.log10(Math.max(1, n)) / 10 * 100)}%`;
+      d.querySelector('i').style.height = `${Math.max(3, Math.log10(Math.max(1, n)) / 10 * 100)}px`;
       d.querySelector('i').className = r < 1 ? 'down' : '';
       d.querySelector('b').textContent = n >= 8e9 ? 'everyone' : fmt(n);
       d.querySelector('span').textContent = g === 0 ? 'start' : `gen ${g}`;
